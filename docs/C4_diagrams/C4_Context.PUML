@@ -1,0 +1,22 @@
+@startuml C4_Context_Aseguradora
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+
+title Diagrama de Contexto (C4 - Nivel 1) - Aseguradora Digital
+
+Person(cliente, "Cliente", "Solicita cotizaciones, compra pólizas y reporta siniestros.")
+Person(asesor, "Asesor Comercial", "Gestiona clientes y asigna siniestros a ajustadores.")
+Person(suscriptor, "Suscriptor de Riesgos", "Evalúa solicitudes de riesgo alto y aprueba emisión manual de pólizas.")
+Person(ajustador, "Ajustador de Siniestros", "Evalúa, dictamina y aprueba/rechaza siniestros.")
+
+System(sistemaAseguradora, "Sistema Aseguradora Digital", "Permite la gestión integral de pólizas, evaluaciones de riesgo y tramitación de siniestros.")
+
+System_Ext(motorReglas, "Motor de Reglas de Riesgo", "Evalúa el nivel de riesgo del cliente y calcula la prima base.")
+
+Rel(cliente, sistemaAseguradora, "Cotiza, compra pólizas y reporta siniestros", "HTTPS/JSON")
+Rel(asesor, sistemaAseguradora, "Asigna casos y monitorea pólizas", "HTTPS/JSON")
+Rel(suscriptor, sistemaAseguradora, "Evalúa riesgos no automáticos y autoriza emisión", "HTTPS/JSON")
+Rel(ajustador, sistemaAseguradora, "Revisa evidencias y liquida siniestros", "HTTPS/JSON")
+
+Rel(sistemaAseguradora, motorReglas, "Consulta evaluación de riesgo automáticas", "REST")
+@enduml

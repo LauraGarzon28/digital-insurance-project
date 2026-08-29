@@ -1,0 +1,41 @@
+@startuml C4_Containers_Aseguradora
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Diagrama de Contenedores (C4 - Nivel 2) - Aseguradora Digital
+
+Person(cliente, "Cliente", "Usuario web / móvil")
+Person(empleado, "Empleado Interno", "Asesor / Suscriptor / Ajustador")
+
+System_Boundary(boundaryAseguradora, "Aseguradora Digital System") {
+    Container(webApp, "Aplicación Web (SPA)", "Angular", "Interfaz de usuario para clientes, suscriptores y personal operativo.")
+    Container(apiGateway, "API Gateway / BFF", "Spring Cloud Gateway", "Enruta peticiones, maneja CORS y autenticación JWT.")
+    
+    Container(polizasService, "Servicio de Cotizaciones y Pólizas", "Java, Spring Boot", "Gestión de cotizaciones, emisión, renovación y estado de pólizas.")
+    Container(suscripcionService, "Servicio de Suscripción y Riesgos", "Java, Spring Boot", "Bandeja de solicitudes pendientes de aprobación manual por suscriptores.")
+    Container(siniestrosService, "Servicio de Siniestros", "Java, Spring Boot", "Recepción de denuncias, adjunción de pruebas y flujo de liquidación.")
+    Container(usuariosService, "Servicio de Usuarios y Auth", "Java, Spring Boot, Spring Security", "Gestión de identidades, roles (CLIENTE, SUSCRIPTOR, AJUSTADOR) y tokens JWT.")
+    
+    ContainerDb(database, "Base de Datos Principal", "PostgreSQL", "Almacena clientes, pólizas, evaluaciones de suscriptor y siniestros.")
+}
+
+System_Ext(motorReglas, "Motor de Reglas", "Servicio externo / microservicio")
+
+Rel(cliente, webApp, "Usa", "HTTPS")
+Rel(empleado, webApp, "Usa", "HTTPS")
+
+Rel(webApp, apiGateway, "Realiza llamadas API con Bearer JWT", "HTTPS/JSON")
+
+Rel(apiGateway, usuariosService, "Enruta autenticación y roles", "HTTP")
+Rel(apiGateway, polizasService, "Enruta cotización y emisión", "HTTP")
+Rel(apiGateway, suscripcionService, "Enruta bandeja de suscripción manual", "HTTP")
+Rel(apiGateway, siniestrosService, "Enruta gestión de siniestros", "HTTP")
+
+Rel(polizasService, database, "Lee y escribe", "JDBC/JPA")
+Rel(suscripcionService, database, "Lee y escribe evaluaciones de riesgo", "JDBC/JPA")
+Rel(siniestrosService, database, "Lee y escribe", "JDBC/JPA")
+Rel(usuariosService, database, "Lee y escribe", "JDBC/JPA")
+
+Rel(polizasService, motorReglas, "Calcula riesgo automático", "REST")
+@enduml
