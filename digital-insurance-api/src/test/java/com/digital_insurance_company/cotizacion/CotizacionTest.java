@@ -10,12 +10,14 @@ import org.junit.jupiter.api.Test;
 
 public class CotizacionTest {
 
+    private final CotizacionFactory factory = new CotizacionFactory();
     private final EvaluacionRiesgoService servicio = new EvaluacionRiesgoService();
     private final ReglasSuscripcion reglas = new ReglasSuscripcion("v1", new BigDecimal("0.02"), 70);
 
-    private Cotizacion nuevaCotizacion(int puntaje) {
-        return new Cotizacion(UUID.randomUUID(), UUID.randomUUID(), new Riesgo("Vehículo particular", new BigDecimal("50000000"), puntaje));
+     private Cotizacion nuevaCotizacion(int puntaje) {
+        return factory.crear(UUID.randomUUID(), "Vehículo particular", new BigDecimal("50000000"), puntaje);
     }
+
 
     @Test
     void riesgoBajoElUmbralQuedaCotizadaConSuPrima() {

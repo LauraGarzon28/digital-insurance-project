@@ -10,7 +10,7 @@ public class Cotizacion {
     private Prima prima;            
     private EstadoCotizacion estado;
 
-    public Cotizacion(UUID id, UUID clienteId, Riesgo riesgo) {
+    Cotizacion(UUID id, UUID clienteId, Riesgo riesgo) {
         if (id == null || clienteId == null || riesgo == null) {
             throw new IllegalArgumentException("Cotización requiere id, clienteId y riesgo");
         }
