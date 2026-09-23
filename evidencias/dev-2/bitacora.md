@@ -3,7 +3,7 @@
 | Paso | Tiempo estimado | Tiempo real | Fecha | Commit |
 |------|-----------------|-------------|-------|--------|
 | 1 · Lenguaje Ubicuo | 20 min | 30 min | 23/09/2026 | feat: add EstadoCotizacion enum for quotation states |
-| 2 · Value Object (Prima) | 45 min | * | * | * |
+| 2 · Value Object (vigenciaPoliza) | 45 min | 45 min | 23/09/2026 | feat: value object VigenciaPoliza con validacion de inicio < fin |
 | 3 · Servicio de Dominio | 35 min | * | * | * |
 | 4 · Límite del Agregado | 15 min | * | * | * |
 | 5 · Factory | 35 min | * | * | * |
