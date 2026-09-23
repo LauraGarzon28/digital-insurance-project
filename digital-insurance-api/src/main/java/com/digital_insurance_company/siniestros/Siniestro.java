@@ -9,6 +9,8 @@ public class Siniestro {
     private EstadoSiniestro estado;
     private final double valorAseguradoPoliza;
 
+    private MontoAprobado montoAprobado;
+
     // Constructor paquete para la Factory
     Siniestro(UUID id, String polizaId, String descripcion, double valorAseguradoPoliza) {
         this.id = id;
@@ -25,6 +27,14 @@ public class Siniestro {
         this.estado = EstadoSiniestro.EN_EVALUACION;
     }
 
+    public void aprobar(double valorAprobado) {
+        if (this.estado != EstadoSiniestro.EN_EVALUACION) {
+            throw new IllegalStateException("El siniestro debe estar en evaluación para ser aprobado");
+        }
+        this.montoAprobado = new MontoAprobado(valorAprobado, this.valorAseguradoPoliza);
+        this.estado = EstadoSiniestro.APROBADO;
+    }
+
     public void rechazar() {
         this.estado = EstadoSiniestro.RECHAZADO;
     }
@@ -34,4 +44,5 @@ public class Siniestro {
     public String getDescripcion() { return descripcion; }
     public EstadoSiniestro getEstado() { return estado; }
     public double getValorAseguradoPoliza() { return valorAseguradoPoliza; }
+    public MontoAprobado getMontoAprobado() { return montoAprobado; }
 }
