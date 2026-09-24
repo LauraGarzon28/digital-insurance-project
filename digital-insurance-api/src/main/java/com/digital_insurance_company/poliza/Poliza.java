@@ -9,13 +9,15 @@ public class Poliza {
     private final UUID id;
     private final UUID clienteId;
     private final UUID cotizacionId;
+    private final ValorAsegurado valorAsegurado;
     private VigenciaPoliza vigencia;
     private boolean cancelada;
     
-    public Poliza(UUID id, UUID clienteId, UUID cotizacionId, VigenciaPoliza vigencia, boolean cancelada) {
-        this.id = UUID.randomUUID();
-        this.clienteId = null;
-        this.cotizacionId = null;
+    Poliza(UUID id, UUID clienteId, UUID cotizacionId, ValorAsegurado valorAsegurado, VigenciaPoliza vigencia, boolean cancelada) {
+        this.id = id;
+        this.clienteId = clienteId;
+        this.cotizacionId = cotizacionId;
+        this.valorAsegurado = valorAsegurado;
         this.vigencia = vigencia;
         this.cancelada = cancelada;
     }
@@ -48,6 +50,8 @@ public class Poliza {
     public UUID id() { return id; }
     public UUID clienteId() { return clienteId; }
     public UUID cotizacionId() { return cotizacionId; }
+    public ValorAsegurado valorAsegurado() { return valorAsegurado; }
+    public VigenciaPoliza vigencia() { return vigencia; }
 
     @Override 
     public boolean equals(Object o){

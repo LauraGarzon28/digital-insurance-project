@@ -12,17 +12,15 @@ public class EmisionPolizaService {
 
     public EmisionPolizaService(PolizaFactory factory) {
         this.factory = Objects.requireNonNull(factory);
+    }
 
-    }
-    
-    public Poliza emitirPoliza(Cotizacion cotizacion, LocalDate fechaEmision) {
-        Objects.requireNonNull(cotizacion, "Debe existir una cotización");
+    public Poliza emitir(Cotizacion cotizacion, LocalDate fechaInicio, LocalDate fechaFin) {
+        Objects.requireNonNull(cotizacion, "La cotización es obligatoria");
         if (cotizacion.estado() != EstadoCotizacion.ACEPTADA) {
-            throw new EmisionNoPermitidaException("La cotización está en estado %s y debe ser ACEPTADA para poder emitir la póliza"
-            .formatted(cotizacion.estado()));
+            throw new EmisionNoPermitidaException(
+                    "No se emite póliza: la cotización está %s y se esperaba ACEPTADA"
+                            .formatted(cotizacion.estado()));
         }
-        VigenciaPoliza vigencia = new VigenciaPoliza(fechaEmision, fechaEmision.plusYears(1));
-        return null;
+        return factory.nueva(cotizacion.clienteId(), cotizacion.id(), cotizacion.riesgo().valorAsegurado(), fechaInicio, fechaFin);
     }
-    
 }
