@@ -1,5 +1,5 @@
 # Bitácora de Implementación Individual - DDD
-**Integrante:** Sergio (Dev 3)
+**Integrante:** Nicolás Ruiz (Dev 3)
 **Subdominio:** Siniestros
 
 | Paso | Tiempo estimado | Tiempo real | Fecha |
