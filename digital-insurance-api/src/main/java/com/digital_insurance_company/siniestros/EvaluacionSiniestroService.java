@@ -1,8 +1,10 @@
 package com.digital_insurance_company.siniestros;
 
+import java.math.BigDecimal;
+
 public class EvaluacionSiniestroService {
 
-    public void evaluar(Siniestro siniestro, EstadoPolizaReferencia estadoPoliza, boolean esFraude, double montoPropuesto) {
+    public void evaluar(Siniestro siniestro, EstadoPolizaReferencia estadoPoliza, boolean esFraude, BigDecimal montoPropuesto) {
         if (siniestro == null) {
             throw new IllegalArgumentException("El siniestro no puede ser nulo");
         }

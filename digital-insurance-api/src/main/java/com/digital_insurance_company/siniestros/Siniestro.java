@@ -1,18 +1,19 @@
 package com.digital_insurance_company.siniestros;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public class Siniestro {
     private final UUID id;
-    private final String polizaId;
+    private final UUID polizaId;
     private final String descripcion;
     private EstadoSiniestro estado;
-    private final double valorAseguradoPoliza;
+    private final BigDecimal valorAseguradoPoliza;
 
     private MontoAprobado montoAprobado;
 
     // Constructor paquete para la Factory
-    Siniestro(UUID id, String polizaId, String descripcion, double valorAseguradoPoliza) {
+    Siniestro(UUID id, UUID polizaId, String descripcion, BigDecimal valorAseguradoPoliza) {
         this.id = id;
         this.polizaId = polizaId;
         this.descripcion = descripcion;
@@ -27,7 +28,7 @@ public class Siniestro {
         this.estado = EstadoSiniestro.EN_EVALUACION;
     }
 
-    public void aprobar(double valorAprobado) {
+    public void aprobar(BigDecimal valorAprobado) {
         if (this.estado != EstadoSiniestro.EN_EVALUACION) {
             throw new IllegalStateException("El siniestro debe estar en evaluación para ser aprobado");
         }
@@ -36,13 +37,16 @@ public class Siniestro {
     }
 
     public void rechazar() {
+        if (this.estado != EstadoSiniestro.EN_EVALUACION) {
+            throw new IllegalStateException("El siniestro debe estar en evaluación para ser rechazado");
+        }
         this.estado = EstadoSiniestro.RECHAZADO;
     }
 
     public UUID getId() { return id; }
-    public String getPolizaId() { return polizaId; }
+    public UUID getPolizaId() { return polizaId; }
     public String getDescripcion() { return descripcion; }
     public EstadoSiniestro getEstado() { return estado; }
-    public double getValorAseguradoPoliza() { return valorAseguradoPoliza; }
+    public BigDecimal getValorAseguradoPoliza() { return valorAseguradoPoliza; }
     public MontoAprobado getMontoAprobado() { return montoAprobado; }
 }
