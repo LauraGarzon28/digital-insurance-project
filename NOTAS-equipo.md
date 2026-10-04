@@ -1,4 +1,4 @@
-﻿# Proyecto G5 - Aseguradora Digital
+# Proyecto G5 - Aseguradora Digital
 
 ## 1. Eventos de Dominio 
 * `CotizacionSolicitada` (HU-01)
@@ -17,19 +17,18 @@
 * `HistoricoSiniestrosConsultado` (HU-10)
 
 ## 2. Eventos Pivote 
-1. **`CotizacionAceptada`**: Marca la transiciÃ³n entre el anÃ¡lisis prospectivo de riesgo/comercial y el compromiso contractual legal (emisiÃ³n de la pÃ³liza). Cambia la responsabilidad de evaluaciÃ³n a cumplimiento legal.
-2. **`SiniestroReportado`**: Conecta la vigencia de la pÃ³liza activa con la gestiÃ³n operativa del reclamo. Requiere validar el estado de la pÃ³liza antes de permitir cualquier flujo de evaluaciÃ³n.
+1. **`CotizacionAceptada`**: Marca la transición entre el análisis prospectivo de riesgo/comercial y el compromiso contractual legal (emisión de la póliza). Cambia la responsabilidad de evaluación a cumplimiento legal.
+2. **`SiniestroReportado`**: Conecta la vigencia de la póliza activa con la gestión operativa del reclamo. Requiere validar el estado de la póliza antes de permitir cualquier flujo de evaluación.
 
 ## 3. Bounded Contexts Candidatos
-* **CotizaciÃ³n y SuscripciÃ³n**: Determina la prima y la asegurabilidad segÃºn reglas de riesgo vigentes sin generar compromisos legales vigentes.
-* **PÃ³lizas**: Administra el ciclo de vida del contrato (emisiÃ³n, vigencia, renovaciÃ³n y cancelaciÃ³n) y garantiza la validez legal del seguro.
-* **Siniestros**: Gestiona el flujo operativo de reclamos, asignaciÃ³n a ajustadores y decisiones de liquidaciÃ³n de indemnizaciones.
+* **Cotización y Suscripción**: Determina la prima y la asegurabilidad según reglas de riesgo vigentes sin generar compromisos legales vigentes.
+* **Pólizas**: Administra el ciclo de vida del contrato (emisión, vigencia, renovación y cancelación) y garantiza la validez legal del seguro.
+* **Siniestros**: Gestiona el flujo operativo de reclamos, asignación a ajustadores y decisiones de liquidación de indemnizaciones.
 
-## 4. AsignaciÃ³n de Subdominios
-* **Dev 1 - Laura GarzÃ³n**: Subdominio de CotizaciÃ³n y SuscripciÃ³n
-* **Dev 2 - Diego Sierra**: Subdominio de PÃ³lizas
-* **Dev 3 - Sergio**:  Subdominio de Siniestros
+## 4. Asignación de Subdominios
+* **Dev 1 - Laura Garzón**: Subdominio de Cotización y Suscripción
+* **Dev 2 - Diego Sierra**: Subdominio de Pólizas
+* **Dev 3 - Nicolás Ruiz**: Subdominio de Siniestros
 
 ## 5. Repositorio de GitHub
 * **URL**: [https://github.com/LauraGarzon28/digital-insurance-project](https://github.com/LauraGarzon28/digital-insurance-project)
-
