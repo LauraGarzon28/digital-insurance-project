@@ -13,3 +13,5 @@
 
 **Trazabilidad:**
 Se han generado commits independientes con el mensaje `feat(siniestros): ...` para respaldar el paso a paso detallado en esta bitácora, y se ejecutaron las pruebas unitarias que respaldan las reglas de negocio de `MontoAprobado` y la lógica de rechazo de la póliza en el servicio de evaluación.
+
+Las capturas de código y pruebas de IntelliJ deben subirse a la carpeta `capturas/` adjunta a este directorio.
