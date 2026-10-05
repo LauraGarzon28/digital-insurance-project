@@ -1,4 +1,4 @@
-package com.digital_insurance_company.cotizacion.dominio;
+package com.digital_insurance_company.cotizacion;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -10,6 +10,11 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
+
+import com.digital_insurance_company.cotizacion.dominio.Cotizacion;
+import com.digital_insurance_company.cotizacion.dominio.CotizacionFactory;
+import com.digital_insurance_company.cotizacion.dominio.EstadoCotizacion;
+import com.digital_insurance_company.cotizacion.dominio.Riesgo;
 
 public class CotizacionFactoryTest {
     private final CotizacionFactory factory = new CotizacionFactory();

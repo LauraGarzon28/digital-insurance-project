@@ -1,4 +1,4 @@
-package com.digital_insurance_company.cotizacion.dominio;
+package com.digital_insurance_company.cotizacion;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -8,6 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 
 import org.junit.jupiter.api.Test;
+
+import com.digital_insurance_company.cotizacion.dominio.EvaluacionRiesgo;
+import com.digital_insurance_company.cotizacion.dominio.EvaluacionRiesgoService;
+import com.digital_insurance_company.cotizacion.dominio.ReglasSuscripcion;
+import com.digital_insurance_company.cotizacion.dominio.Riesgo;
 
 public class EvaluacionRiesgoServiceTest {
      private final EvaluacionRiesgoService servicio = new EvaluacionRiesgoService();

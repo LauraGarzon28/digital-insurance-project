@@ -1,4 +1,4 @@
-package com.digital_insurance_company.cotizacion.dominio;
+package com.digital_insurance_company.cotizacion;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.math.BigDecimal;
 
 import org.junit.jupiter.api.Test;
+
+import com.digital_insurance_company.cotizacion.dominio.Prima;
 
 public class PrimaTest {
 
