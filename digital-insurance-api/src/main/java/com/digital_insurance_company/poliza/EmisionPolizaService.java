@@ -3,8 +3,8 @@ package com.digital_insurance_company.poliza;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import com.digital_insurance_company.cotizacion.Cotizacion;
-import com.digital_insurance_company.cotizacion.EstadoCotizacion;
+import com.digital_insurance_company.cotizacion.dominio.Cotizacion;
+import com.digital_insurance_company.cotizacion.dominio.EstadoCotizacion;
 
 public class EmisionPolizaService {
 

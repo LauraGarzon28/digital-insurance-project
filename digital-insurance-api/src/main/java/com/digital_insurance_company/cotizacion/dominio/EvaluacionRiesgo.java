@@ -1,4 +1,4 @@
-package com.digital_insurance_company.cotizacion;
+package com.digital_insurance_company.cotizacion.dominio;
 
 public record EvaluacionRiesgo(Prima prima, boolean requiereRevisionManual) {
 

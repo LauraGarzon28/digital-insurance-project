@@ -1,4 +1,4 @@
-package com.digital_insurance_company.cotizacion;
+package com.digital_insurance_company.cotizacion.dominio;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

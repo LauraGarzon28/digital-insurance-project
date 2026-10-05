@@ -1,13 +1,13 @@
-package com.digital_insurance_company.cotizacion;
+package com.digital_insurance_company.cotizacion.dominio;
 
 import java.util.UUID;
 
 public class Cotizacion {
-    
+
     private final UUID id;
-    private final UUID clienteId;  
+    private final UUID clienteId;
     private final Riesgo riesgo;
-    private Prima prima;            
+    private Prima prima;
     private EstadoCotizacion estado;
 
     Cotizacion(UUID id, UUID clienteId, Riesgo riesgo) {
@@ -50,9 +50,23 @@ public class Cotizacion {
         }
     }
 
-    public UUID id() { return id; }
-    public UUID clienteId() { return clienteId; }
-    public Riesgo riesgo() { return riesgo; }
-    public Prima prima() { return prima; }
-    public EstadoCotizacion estado() { return estado; }
+    public UUID id() {
+        return id;
+    }
+
+    public UUID clienteId() {
+        return clienteId;
+    }
+
+    public Riesgo riesgo() {
+        return riesgo;
+    }
+
+    public Prima prima() {
+        return prima;
+    }
+
+    public EstadoCotizacion estado() {
+        return estado;
+    }
 }
