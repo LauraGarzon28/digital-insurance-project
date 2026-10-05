@@ -8,11 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
-import com.digital_insurance_company.cotizacion.Cotizacion;
-import com.digital_insurance_company.cotizacion.CotizacionFactory;
-import com.digital_insurance_company.cotizacion.EvaluacionRiesgoService;
-import com.digital_insurance_company.cotizacion.ReglasSuscripcion;
-import com.digital_insurance_company.cotizacion.Riesgo;
+import com.digital_insurance_company.cotizacion.dominio.Cotizacion;
+import com.digital_insurance_company.cotizacion.dominio.CotizacionFactory;
+import com.digital_insurance_company.cotizacion.dominio.EvaluacionRiesgoService;
+import com.digital_insurance_company.cotizacion.dominio.EstadoCotizacion;
+import com.digital_insurance_company.cotizacion.dominio.ReglasSuscripcion;
+import com.digital_insurance_company.cotizacion.dominio.Riesgo;
 
 public class EmisionPolizaServiceTest {
 
@@ -31,7 +32,7 @@ public class EmisionPolizaServiceTest {
         Riesgo riesgo = new Riesgo("Vivienda unifamiliar", new BigDecimal("80000000"), puntajeRiesgo);
         Cotizacion c = cotizacionFactory.crear(clienteId, riesgo);
         c.registrarEvaluacion(evaluacionService.evaluar(riesgo, reglas));
-        if (c.estado() == com.digital_insurance_company.cotizacion.EstadoCotizacion.EN_REVISION_MANUAL) {
+        if (c.estado() == EstadoCotizacion.EN_REVISION_MANUAL) {
             c.aprobarRevisionManual();
         }
         c.aceptar();
