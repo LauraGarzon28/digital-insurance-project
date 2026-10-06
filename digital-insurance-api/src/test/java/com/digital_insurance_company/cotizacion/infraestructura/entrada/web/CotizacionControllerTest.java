@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import com.digital_insurance_company.cotizacion.aplicacion.CotizacionApplicationService;
 import com.digital_insurance_company.cotizacion.dominio.Cotizacion;
@@ -20,6 +21,7 @@ class CotizacionControllerTest {
 
     private final CotizacionRepositoryInMemoryAdapter repositorio =
             new CotizacionRepositoryInMemoryAdapter();
+    private final LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 
     private final MockMvc mockMvc = MockMvcBuilders
             .standaloneSetup(new CotizacionController(
@@ -27,6 +29,7 @@ class CotizacionControllerTest {
                             new CotizacionFactory(),
                             new EvaluacionRiesgoService(),
                             repositorio)))
+            .setValidator(validator)
             .setControllerAdvice(new CotizacionControllerAdvice())
             .build();
 
@@ -89,6 +92,50 @@ class CotizacionControllerTest {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
                         .get("/api/cotizaciones/00000000-0000-0000-0000-000000000000"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void rechazaUnaSolicitudDeCotizacionInvalidaCon400() throws Exception {
+        mockMvc.perform(post("/api/cotizaciones")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "clienteId": null,
+                                  "descripcionRiesgo": "",
+                                  "valorAsegurado": -1,
+                                  "puntajeRiesgo": 101
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje")
+                        .value("La solicitud contiene datos inválidos"))
+                .andExpect(jsonPath("$.errores").isArray())
+                .andExpect(jsonPath("$.errores[?(@.campo == 'clienteId')]").isNotEmpty())
+                .andExpect(jsonPath("$.errores[?(@.campo == 'descripcionRiesgo')]").isNotEmpty())
+                .andExpect(jsonPath("$.errores[?(@.campo == 'valorAsegurado')]").isNotEmpty())
+                .andExpect(jsonPath("$.errores[?(@.campo == 'puntajeRiesgo')]").isNotEmpty());
+    }
+
+    @Test
+    void rechazaReglasDeEvaluacionInvalidasCon400() throws Exception {
+        Cotizacion cotizacion = guardarCotizacion();
+
+        mockMvc.perform(post("/api/cotizaciones/" + cotizacion.id() + "/evaluacion")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "versionReglas": " ",
+                                  "tasaBase": 0,
+                                  "umbralRevisionManual": -1
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje")
+                        .value("La solicitud contiene datos inválidos"))
+                .andExpect(jsonPath("$.errores").isArray())
+                .andExpect(jsonPath("$.errores[?(@.campo == 'versionReglas')]").isNotEmpty())
+                .andExpect(jsonPath("$.errores[?(@.campo == 'tasaBase')]").isNotEmpty())
+                .andExpect(jsonPath("$.errores[?(@.campo == 'umbralRevisionManual')]").isNotEmpty());
     }
 
     private Cotizacion guardarCotizacion() {
