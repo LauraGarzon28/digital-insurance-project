@@ -1,0 +1,33 @@
+meta {
+  name: Paso 4 - Segunda evaluación (guarda del agregado)
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://localhost:8080/api/siniestros/{{siniestroA}}/evaluacion
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "estadoPoliza": "ACTIVA",
+    "esFraude": false,
+    "montoPropuesto": 1000
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.mensaje: eq Solo un siniestro reportado puede pasar a evaluación
+}
+
+docs {
+  Límite del agregado (paso 4): el siniestro del request 01 quedó RECHAZADO; la guarda de estado
+  impide volver a evaluarlo. Solo la entidad cambia su estado y solo por transiciones válidas.
+}
