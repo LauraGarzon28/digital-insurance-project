@@ -1,4 +1,4 @@
-package com.digital_insurance_company.siniestros;
+package com.digital_insurance_company.siniestros.dominio;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
