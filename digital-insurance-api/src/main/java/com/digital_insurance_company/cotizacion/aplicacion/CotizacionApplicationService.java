@@ -1,6 +1,7 @@
 package com.digital_insurance_company.cotizacion.aplicacion;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.digital_insurance_company.cotizacion.dominio.Cotizacion;
@@ -29,27 +30,42 @@ public class CotizacionApplicationService implements CotizacionUseCase {
     }
 
     @Override
-    public void evaluar(Cotizacion cotizacion, ReglasSuscripcion reglas) {
-        Objects.requireNonNull(cotizacion, "La cotización es obligatoria");
+    public Optional<Cotizacion> buscarPorId(UUID id) {
+        return repositorioCotizaciones.buscarPorId(id);
+    }
+
+    @Override
+    public Cotizacion evaluar(UUID id, ReglasSuscripcion reglas) {
+        Cotizacion cotizacion = obtener(id);
         cotizacion.registrarEvaluacion(
                 evaluacionRiesgoService.evaluar(cotizacion.riesgo(), reglas));
+        return repositorioCotizaciones.guardar(cotizacion);
     }
 
     @Override
-    public void aprobarRevisionManual(Cotizacion cotizacion) {
-        Objects.requireNonNull(cotizacion, "La cotización es obligatoria")
-                .aprobarRevisionManual();
+    public Cotizacion aprobarRevisionManual(UUID id) {
+        Cotizacion cotizacion = obtener(id);
+        cotizacion.aprobarRevisionManual();
+        return repositorioCotizaciones.guardar(cotizacion);
     }
 
     @Override
-    public void rechazar(Cotizacion cotizacion) {
-        Objects.requireNonNull(cotizacion, "La cotización es obligatoria")
-                .rechazar();
+    public Cotizacion rechazar(UUID id) {
+        Cotizacion cotizacion = obtener(id);
+        cotizacion.rechazar();
+        return repositorioCotizaciones.guardar(cotizacion);
     }
 
     @Override
-    public void aceptar(Cotizacion cotizacion) {
-        Objects.requireNonNull(cotizacion, "La cotización es obligatoria")
-                .aceptar();
+    public Cotizacion aceptar(UUID id) {
+        Cotizacion cotizacion = obtener(id);
+        cotizacion.aceptar();
+        return repositorioCotizaciones.guardar(cotizacion);
+    }
+
+    private Cotizacion obtener(UUID id) {
+        Objects.requireNonNull(id, "El id de la cotización es obligatorio");
+        return repositorioCotizaciones.buscarPorId(id)
+                .orElseThrow(() -> new CotizacionNoEncontradaException(id));
     }
 }

@@ -42,8 +42,8 @@ class CotizacionApplicationServiceTest {
                 UUID.randomUUID(),
                 new Riesgo("Vivienda", new BigDecimal("100000000"), 30));
 
-        casoDeUso.evaluar(cotizacion, reglas);
-        casoDeUso.aceptar(cotizacion);
+        casoDeUso.evaluar(cotizacion.id(), reglas);
+        casoDeUso.aceptar(cotizacion.id());
 
         assertEquals(EstadoCotizacion.ACEPTADA, cotizacion.estado());
     }

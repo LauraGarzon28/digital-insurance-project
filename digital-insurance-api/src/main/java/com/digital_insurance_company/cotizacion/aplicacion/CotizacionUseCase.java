@@ -1,6 +1,7 @@
 package com.digital_insurance_company.cotizacion.aplicacion;
 
 import java.util.UUID;
+import java.util.Optional;
 
 import com.digital_insurance_company.cotizacion.dominio.Cotizacion;
 import com.digital_insurance_company.cotizacion.dominio.ReglasSuscripcion;
@@ -10,11 +11,13 @@ public interface CotizacionUseCase {
 
     Cotizacion solicitar(UUID clienteId, Riesgo riesgo);
 
-    void evaluar(Cotizacion cotizacion, ReglasSuscripcion reglas);
+    Optional<Cotizacion> buscarPorId(UUID id);
 
-    void aprobarRevisionManual(Cotizacion cotizacion);
+    Cotizacion evaluar(UUID id, ReglasSuscripcion reglas);
 
-    void rechazar(Cotizacion cotizacion);
+    Cotizacion aprobarRevisionManual(UUID id);
 
-    void aceptar(Cotizacion cotizacion);
+    Cotizacion rechazar(UUID id);
+
+    Cotizacion aceptar(UUID id);
 }
