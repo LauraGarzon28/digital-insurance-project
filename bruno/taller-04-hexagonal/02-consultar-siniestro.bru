@@ -1,0 +1,20 @@
+meta {
+  name: Consultar siniestro
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8080/api/siniestros/{{siniestroId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.estado: eq REPORTADO
+}
+
+docs {
+  Consulta el siniestro recién reportado (variable siniestroId).
+}

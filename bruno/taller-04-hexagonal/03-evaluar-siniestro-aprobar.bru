@@ -1,0 +1,33 @@
+meta {
+  name: Evaluar siniestro (aprobar)
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:8080/api/siniestros/{{siniestroId}}/evaluacion
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "estadoPoliza": "ACTIVA",
+    "esFraude": false,
+    "montoPropuesto": 10000
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.estado: eq APROBADO
+  res.body.montoAprobado: isNumber
+}
+
+docs {
+  Evalúa el siniestro: con póliza activa y sin fraude se aprueba con el monto propuesto.
+}

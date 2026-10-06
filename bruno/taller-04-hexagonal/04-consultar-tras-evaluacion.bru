@@ -1,0 +1,20 @@
+meta {
+  name: Consultar siniestro tras evaluación
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:8080/api/siniestros/{{siniestroId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.estado: eq APROBADO
+}
+
+docs {
+  Verifica que el estado aprobado quedó persistido por el adaptador de salida.
+}

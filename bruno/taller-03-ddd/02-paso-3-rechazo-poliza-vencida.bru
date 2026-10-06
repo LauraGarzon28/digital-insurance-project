@@ -1,0 +1,33 @@
+meta {
+  name: Paso 3 - Rechazo por póliza vencida
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/api/siniestros/{{siniestroA}}/evaluacion
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "estadoPoliza": "VENCIDA",
+    "esFraude": false,
+    "montoPropuesto": 5000
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.estado: eq RECHAZADO
+}
+
+docs {
+  Servicio de dominio (paso 3): si la póliza está vencida o cancelada, el siniestro se rechaza.
+  Usa el siniestro creado en el request 01 (variable siniestroA).
+}

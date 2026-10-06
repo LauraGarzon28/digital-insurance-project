@@ -1,0 +1,32 @@
+meta {
+  name: Evaluar siniestro inexistente
+  type: http
+  seq: 6
+}
+
+post {
+  url: http://localhost:8080/api/siniestros/00000000-0000-0000-0000-000000000000/evaluacion
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "estadoPoliza": "ACTIVA",
+    "esFraude": false,
+    "montoPropuesto": 1000
+  }
+}
+
+assert {
+  res.status: eq 404
+  res.body.mensaje: eq No existe el siniestro 00000000-0000-0000-0000-000000000000
+}
+
+docs {
+  Evaluar un siniestro que no existe también responde 404.
+}

@@ -1,0 +1,32 @@
+meta {
+  name: Reportar siniestro con datos inválidos
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://localhost:8080/api/siniestros
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "polizaId": "33333333-3333-3333-3333-333333333333",
+    "descripcion": "Choque frontal",
+    "valorAseguradoPoliza": -5
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.mensaje: eq El valor asegurado de la póliza debe ser mayor a cero
+}
+
+docs {
+  Las validaciones de la factory responden 400 a través del advice del controller.
+}

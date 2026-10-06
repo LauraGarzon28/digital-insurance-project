@@ -1,0 +1,33 @@
+meta {
+  name: Paso 3 - Rechazo por fraude
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8080/api/siniestros/{{siniestroB}}/evaluacion
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "estadoPoliza": "ACTIVA",
+    "esFraude": true,
+    "montoPropuesto": 5000
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.estado: eq RECHAZADO
+}
+
+docs {
+  Servicio de dominio (paso 3): con fraude marcado, el siniestro se rechaza aunque la póliza esté activa.
+  Usa el siniestro creado en el request 03 (variable siniestroB).
+}

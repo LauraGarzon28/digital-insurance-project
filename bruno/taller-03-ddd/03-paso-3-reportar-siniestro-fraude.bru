@@ -1,0 +1,36 @@
+meta {
+  name: Paso 3 - Reportar para caso de fraude
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:8080/api/siniestros
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "polizaId": "33333333-3333-3333-3333-333333333333",
+    "descripcion": "Robo de equipo",
+    "valorAseguradoPoliza": 15000
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.estado: eq REPORTADO
+}
+
+script:post-response {
+  bru.setVar("siniestroB", res.body.id);
+}
+
+docs {
+  Crea un segundo siniestro (guardado en siniestroB) para probar el rechazo por fraude.
+}

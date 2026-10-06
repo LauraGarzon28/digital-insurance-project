@@ -1,0 +1,33 @@
+meta {
+  name: Paso 5 - Datos inválidos en la factory
+  type: http
+  seq: 8
+}
+
+post {
+  url: http://localhost:8080/api/siniestros
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "polizaId": "33333333-3333-3333-3333-333333333333",
+    "descripcion": "Choque frontal",
+    "valorAseguradoPoliza": 0
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.mensaje: eq El valor asegurado de la póliza debe ser mayor a cero
+}
+
+docs {
+  Factory (paso 5): nadie puede construir un siniestro a medio armar; la factory valida
+  los datos antes de crear la entidad.
+}
