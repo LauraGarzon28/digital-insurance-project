@@ -1,4 +1,4 @@
-package com.digital_insurance_company.poliza;
+package com.digital_insurance_company.poliza.dominio;
 
 import java.math.BigDecimal;
 import java.util.Objects;
