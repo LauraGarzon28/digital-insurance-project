@@ -13,16 +13,19 @@ public class CotizacionApplicationService implements CotizacionUseCase {
 
     private final CotizacionFactory cotizacionFactory;
     private final EvaluacionRiesgoService evaluacionRiesgoService;
+    private final RepositorioCotizaciones repositorioCotizaciones;
 
     public CotizacionApplicationService(CotizacionFactory cotizacionFactory,
-            EvaluacionRiesgoService evaluacionRiesgoService) {
+            EvaluacionRiesgoService evaluacionRiesgoService,
+            RepositorioCotizaciones repositorioCotizaciones) {
         this.cotizacionFactory = Objects.requireNonNull(cotizacionFactory);
         this.evaluacionRiesgoService = Objects.requireNonNull(evaluacionRiesgoService);
+        this.repositorioCotizaciones = Objects.requireNonNull(repositorioCotizaciones);
     }
 
     @Override
     public Cotizacion solicitar(UUID clienteId, Riesgo riesgo) {
-        return cotizacionFactory.crear(clienteId, riesgo);
+        return repositorioCotizaciones.guardar(cotizacionFactory.crear(clienteId, riesgo));
     }
 
     @Override

@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.digital_insurance_company.cotizacion.aplicacion.CotizacionApplicationService;
+import com.digital_insurance_company.cotizacion.infraestructura.salida.persistencia.CotizacionRepositoryInMemoryAdapter;
 import com.digital_insurance_company.cotizacion.dominio.CotizacionFactory;
 import com.digital_insurance_company.cotizacion.dominio.EvaluacionRiesgoService;
 
@@ -20,7 +21,8 @@ class CotizacionControllerTest {
             .standaloneSetup(new CotizacionController(
                     new CotizacionApplicationService(
                             new CotizacionFactory(),
-                            new EvaluacionRiesgoService())))
+                            new EvaluacionRiesgoService(),
+                            new CotizacionRepositoryInMemoryAdapter())))
             .build();
 
     @Test
