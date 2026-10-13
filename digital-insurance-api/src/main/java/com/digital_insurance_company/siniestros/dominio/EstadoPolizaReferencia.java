@@ -1,4 +1,4 @@
-package com.digital_insurance_company.siniestros;
+package com.digital_insurance_company.siniestros.dominio;
 
 public enum EstadoPolizaReferencia {
     ACTIVA,
