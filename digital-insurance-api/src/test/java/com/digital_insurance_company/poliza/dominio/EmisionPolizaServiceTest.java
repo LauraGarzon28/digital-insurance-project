@@ -31,13 +31,15 @@ class EmisionPolizaServiceTest {
 
     @Test
     void noEmiteSiLaCotizacionNoEstaAceptada() {
-        assertThrows(EmisionNoPermitidaException.class,
+        EmisionNoPermitidaException excepcion = assertThrows(EmisionNoPermitidaException.class,
                 () -> servicio.emitir(datos(false), INICIO, FIN));
+        assertEquals(EmisionNoPermitidaException.class, excepcion.getClass());
     }
 
     @Test
     void propagaVigenciaInvalida() {
-        assertThrows(IllegalArgumentException.class,
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> servicio.emitir(datos(true), FIN, INICIO));
+        assertEquals(IllegalArgumentException.class, exception.getClass());
     }
 }

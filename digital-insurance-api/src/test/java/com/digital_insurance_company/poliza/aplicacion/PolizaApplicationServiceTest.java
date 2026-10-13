@@ -82,14 +82,16 @@ class PolizaApplicationServiceTest {
         consultaCotizacion.cotizaciones.put(cotizacionId, new DatosCotizacionParaEmision(
                 cotizacionId, UUID.randomUUID(), new BigDecimal("80000000"), false));
 
-        assertThrows(EmisionNoPermitidaException.class,
+        EmisionNoPermitidaException excepcion = assertThrows(EmisionNoPermitidaException.class,
                 () -> casosDeUso.emitirPoliza(cotizacionId, INICIO, FIN));
+        assertNotNull(excepcion);
     }
 
     @Test
     void emitirFallaSiLaCotizacionNoExiste() {
-        assertThrows(IllegalArgumentException.class,
+        IllegalArgumentException excepcion = assertThrows(IllegalArgumentException.class,
                 () -> casosDeUso.emitirPoliza(UUID.randomUUID(), INICIO, FIN));
+        assertNotNull(excepcion);
     }
 
     @Test
