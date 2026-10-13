@@ -1,4 +1,4 @@
-package com.digital_insurance_company.cotizacion.aplicacion;
+package com.digital_insurance_company.compartido;
 
 import java.util.UUID;
 

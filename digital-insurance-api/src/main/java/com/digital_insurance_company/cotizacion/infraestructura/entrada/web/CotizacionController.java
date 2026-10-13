@@ -11,13 +11,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 import com.digital_insurance_company.cotizacion.aplicacion.CotizacionUseCase;
 import com.digital_insurance_company.cotizacion.dominio.Cotizacion;
 import com.digital_insurance_company.cotizacion.dominio.Riesgo;
 import com.digital_insurance_company.cotizacion.dominio.ReglasSuscripcion;
 
 @RestController
-@RequestMapping("/api/cotizaciones")
+@RequestMapping("/cotizaciones")
 public class CotizacionController {
 
     private final CotizacionUseCase cotizacionUseCase;
@@ -27,7 +29,8 @@ public class CotizacionController {
     }
 
     @PostMapping
-    public ResponseEntity<CotizacionResponse> solicitar(@RequestBody CotizacionRequest request) {
+    public ResponseEntity<CotizacionResponse> solicitar(
+            @Valid @RequestBody CotizacionRequest request) {
         Cotizacion cotizacion = cotizacionUseCase.solicitar(
                 request.clienteId(),
                 new Riesgo(
@@ -36,7 +39,7 @@ public class CotizacionController {
                         request.puntajeRiesgo()));
 
         return ResponseEntity
-                .created(URI.create("/api/cotizaciones/" + cotizacion.id()))
+                .created(URI.create("/cotizaciones/" + cotizacion.id()))
                 .body(CotizacionResponse.desde(cotizacion));
     }
 
@@ -50,7 +53,7 @@ public class CotizacionController {
     @PostMapping("/{id}/evaluacion")
     public CotizacionResponse evaluar(
             @PathVariable UUID id,
-            @RequestBody EvaluarCotizacionRequest request) {
+            @Valid @RequestBody EvaluarCotizacionRequest request) {
         Cotizacion cotizacion = cotizacionUseCase.evaluar(
                 id,
                 new ReglasSuscripcion(
