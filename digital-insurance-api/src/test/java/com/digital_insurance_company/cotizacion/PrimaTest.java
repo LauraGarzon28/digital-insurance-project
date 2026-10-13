@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 
 import org.junit.jupiter.api.Test;
 
+import com.digital_insurance_company.cotizacion.dominio.Prima;
+
 public class PrimaTest {
 
     @Test

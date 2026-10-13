@@ -11,6 +11,11 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
+import com.digital_insurance_company.cotizacion.dominio.Cotizacion;
+import com.digital_insurance_company.cotizacion.dominio.CotizacionFactory;
+import com.digital_insurance_company.cotizacion.dominio.EstadoCotizacion;
+import com.digital_insurance_company.cotizacion.dominio.Riesgo;
+
 public class CotizacionFactoryTest {
     private final CotizacionFactory factory = new CotizacionFactory();
 
