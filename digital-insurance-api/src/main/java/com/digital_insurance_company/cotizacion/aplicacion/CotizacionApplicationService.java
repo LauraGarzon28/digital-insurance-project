@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.digital_insurance_company.compartido.CotizacionNoEncontradaException;
 import com.digital_insurance_company.cotizacion.dominio.Cotizacion;
 import com.digital_insurance_company.cotizacion.dominio.CotizacionFactory;
 import com.digital_insurance_company.cotizacion.dominio.EvaluacionRiesgoService;

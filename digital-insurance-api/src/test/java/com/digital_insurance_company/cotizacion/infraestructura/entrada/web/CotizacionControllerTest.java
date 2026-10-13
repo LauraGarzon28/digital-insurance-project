@@ -44,13 +44,13 @@ class CotizacionControllerTest {
                 }
                 """;
 
-        mockMvc.perform(post("/api/cotizaciones")
+        mockMvc.perform(post("/cotizaciones")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location",
                         org.hamcrest.Matchers.matchesPattern(
-                                "/api/cotizaciones/[0-9a-f-]+")))
+                                "/cotizaciones/[0-9a-f-]+")))
                 .andExpect(jsonPath("$.clienteId")
                         .value("2f5e2d71-4ab1-4d08-8d3f-0b8329f8d3c8"))
                 .andExpect(jsonPath("$.estado").value("SOLICITADA"))
@@ -62,7 +62,7 @@ class CotizacionControllerTest {
         Cotizacion cotizacion = guardarCotizacion();
 
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                        .get("/api/cotizaciones/" + cotizacion.id()))
+                        .get("/cotizaciones/" + cotizacion.id()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(cotizacion.id().toString()))
                 .andExpect(jsonPath("$.estado").value("SOLICITADA"));
@@ -72,7 +72,7 @@ class CotizacionControllerTest {
     void evaluaUnaCotizacionYCalculaSuPrima() throws Exception {
         Cotizacion cotizacion = guardarCotizacion();
 
-        mockMvc.perform(post("/api/cotizaciones/" + cotizacion.id() + "/evaluacion")
+        mockMvc.perform(post("/cotizaciones/" + cotizacion.id() + "/evaluacion")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -90,13 +90,13 @@ class CotizacionControllerTest {
     @Test
     void devuelve404AlConsultarUnaCotizacionInexistente() throws Exception {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                        .get("/api/cotizaciones/00000000-0000-0000-0000-000000000000"))
+                        .get("/cotizaciones/00000000-0000-0000-0000-000000000000"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void rechazaUnaSolicitudDeCotizacionInvalidaCon400() throws Exception {
-        mockMvc.perform(post("/api/cotizaciones")
+        mockMvc.perform(post("/cotizaciones")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -120,7 +120,7 @@ class CotizacionControllerTest {
     void rechazaReglasDeEvaluacionInvalidasCon400() throws Exception {
         Cotizacion cotizacion = guardarCotizacion();
 
-        mockMvc.perform(post("/api/cotizaciones/" + cotizacion.id() + "/evaluacion")
+        mockMvc.perform(post("/cotizaciones/" + cotizacion.id() + "/evaluacion")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {

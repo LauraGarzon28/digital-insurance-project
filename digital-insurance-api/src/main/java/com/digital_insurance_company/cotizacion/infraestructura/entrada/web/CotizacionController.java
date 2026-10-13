@@ -19,7 +19,7 @@ import com.digital_insurance_company.cotizacion.dominio.Riesgo;
 import com.digital_insurance_company.cotizacion.dominio.ReglasSuscripcion;
 
 @RestController
-@RequestMapping("/api/cotizaciones")
+@RequestMapping("/cotizaciones")
 public class CotizacionController {
 
     private final CotizacionUseCase cotizacionUseCase;
@@ -39,7 +39,7 @@ public class CotizacionController {
                         request.puntajeRiesgo()));
 
         return ResponseEntity
-                .created(URI.create("/api/cotizaciones/" + cotizacion.id()))
+                .created(URI.create("/cotizaciones/" + cotizacion.id()))
                 .body(CotizacionResponse.desde(cotizacion));
     }
 
