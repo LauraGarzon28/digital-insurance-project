@@ -14,6 +14,8 @@ import com.digital_insurance_company.cotizacion.dominio.EvaluacionRiesgoService;
 import com.digital_insurance_company.cotizacion.dominio.EstadoCotizacion;
 import com.digital_insurance_company.cotizacion.dominio.ReglasSuscripcion;
 import com.digital_insurance_company.cotizacion.dominio.Riesgo;
+import com.digital_insurance_company.cliente.aplicacion.RepositorioClientes;
+import com.digital_insurance_company.cliente.dominio.Cliente;
 
 class CotizacionApplicationServiceTest {
 
@@ -31,6 +33,22 @@ class CotizacionApplicationServiceTest {
                 @Override
                 public Optional<Cotizacion> buscarPorId(UUID id) {
                     return Optional.ofNullable(cotizacion);
+                }
+            }, new RepositorioClientes() {
+                @Override
+                public Cliente guardar(Cliente cliente) {
+                    return cliente;
+                }
+
+                @Override
+                public Optional<Cliente> buscarPorId(UUID id) {
+                    return Optional.of(new Cliente(
+                            id, "Cliente de prueba", "CC", "123", "test@example.com", "3000000000"));
+                }
+
+                @Override
+                public boolean existePorNumeroDocumento(String numeroDocumento) {
+                    return false;
                 }
             });
     private final ReglasSuscripcion reglas = new ReglasSuscripcion(

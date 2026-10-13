@@ -16,11 +16,17 @@ import com.digital_insurance_company.cotizacion.dominio.Cotizacion;
 import com.digital_insurance_company.cotizacion.infraestructura.salida.persistencia.CotizacionRepositoryInMemoryAdapter;
 import com.digital_insurance_company.cotizacion.dominio.CotizacionFactory;
 import com.digital_insurance_company.cotizacion.dominio.EvaluacionRiesgoService;
+import com.digital_insurance_company.cliente.infraestructura.salida.persistencia.ClienteRepositoryInMemoryAdapter;
+import com.digital_insurance_company.cliente.dominio.Cliente;
 
 class CotizacionControllerTest {
 
     private final CotizacionRepositoryInMemoryAdapter repositorio =
             new CotizacionRepositoryInMemoryAdapter();
+    private final ClienteRepositoryInMemoryAdapter repositorioClientes =
+            new ClienteRepositoryInMemoryAdapter();
+    private final java.util.UUID clienteId =
+            java.util.UUID.fromString("2f5e2d71-4ab1-4d08-8d3f-0b8329f8d3c8");
     private final LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 
     private final MockMvc mockMvc = MockMvcBuilders
@@ -28,13 +34,15 @@ class CotizacionControllerTest {
                     new CotizacionApplicationService(
                             new CotizacionFactory(),
                             new EvaluacionRiesgoService(),
-                            repositorio)))
+                            repositorio,
+                            repositorioClientes)))
             .setValidator(validator)
             .setControllerAdvice(new CotizacionControllerAdvice())
             .build();
 
     @Test
     void solicitaUnaCotizacionYDevuelveLaCotizacionCreada() throws Exception {
+        registrarCliente();
         String request = """
                 {
                   "clienteId": "2f5e2d71-4ab1-4d08-8d3f-0b8329f8d3c8",
@@ -117,6 +125,23 @@ class CotizacionControllerTest {
     }
 
     @Test
+    void rechazaLaCotizacionCuandoElClienteNoExiste() throws Exception {
+        mockMvc.perform(post("/cotizaciones")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "clienteId": "00000000-0000-0000-0000-000000000000",
+                                  "descripcionRiesgo": "Vivienda",
+                                  "valorAsegurado": 100000000,
+                                  "puntajeRiesgo": 30
+                                }
+                                """))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.mensaje")
+                        .value("No existe un cliente con id 00000000-0000-0000-0000-000000000000"));
+    }
+
+    @Test
     void rechazaReglasDeEvaluacionInvalidasCon400() throws Exception {
         Cotizacion cotizacion = guardarCotizacion();
 
@@ -139,10 +164,23 @@ class CotizacionControllerTest {
     }
 
     private Cotizacion guardarCotizacion() {
+        registrarCliente();
         return repositorio.guardar(new CotizacionFactory().crear(
-                java.util.UUID.randomUUID(),
+                clienteId,
                 "Vivienda",
                 new java.math.BigDecimal("100000000"),
                 30));
+    }
+
+    private void registrarCliente() {
+        if (repositorioClientes.buscarPorId(clienteId).isEmpty()) {
+            repositorioClientes.guardar(new Cliente(
+                    clienteId,
+                    "Laura Garzón",
+                    "CC",
+                    "1234567890",
+                    "laura@example.com",
+                    "3001234567"));
+        }
     }
 }

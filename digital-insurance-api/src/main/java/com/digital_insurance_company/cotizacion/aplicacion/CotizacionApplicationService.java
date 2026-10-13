@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.digital_insurance_company.compartido.CotizacionNoEncontradaException;
+import com.digital_insurance_company.cliente.aplicacion.ClienteNoEncontradoException;
+import com.digital_insurance_company.cliente.aplicacion.RepositorioClientes;
 import com.digital_insurance_company.cotizacion.dominio.Cotizacion;
 import com.digital_insurance_company.cotizacion.dominio.CotizacionFactory;
 import com.digital_insurance_company.cotizacion.dominio.EvaluacionRiesgoService;
@@ -16,17 +18,22 @@ public class CotizacionApplicationService implements CotizacionUseCase {
     private final CotizacionFactory cotizacionFactory;
     private final EvaluacionRiesgoService evaluacionRiesgoService;
     private final RepositorioCotizaciones repositorioCotizaciones;
+    private final RepositorioClientes repositorioClientes;
 
     public CotizacionApplicationService(CotizacionFactory cotizacionFactory,
             EvaluacionRiesgoService evaluacionRiesgoService,
-            RepositorioCotizaciones repositorioCotizaciones) {
+            RepositorioCotizaciones repositorioCotizaciones,
+            RepositorioClientes repositorioClientes) {
         this.cotizacionFactory = Objects.requireNonNull(cotizacionFactory);
         this.evaluacionRiesgoService = Objects.requireNonNull(evaluacionRiesgoService);
         this.repositorioCotizaciones = Objects.requireNonNull(repositorioCotizaciones);
+        this.repositorioClientes = Objects.requireNonNull(repositorioClientes);
     }
 
     @Override
     public Cotizacion solicitar(UUID clienteId, Riesgo riesgo) {
+        repositorioClientes.buscarPorId(clienteId)
+                .orElseThrow(() -> new ClienteNoEncontradoException(clienteId));
         return repositorioCotizaciones.guardar(cotizacionFactory.crear(clienteId, riesgo));
     }
 
