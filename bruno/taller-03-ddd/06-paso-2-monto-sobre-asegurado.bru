@@ -1,0 +1,33 @@
+meta {
+  name: Paso 2 - Monto superior al valor asegurado
+  type: http
+  seq: 6
+}
+
+post {
+  url: http://localhost:8080/api/siniestros/{{siniestroC}}/evaluacion
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "estadoPoliza": "ACTIVA",
+    "esFraude": false,
+    "montoPropuesto": 2000000
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.mensaje: eq El monto aprobado no puede superar el valor asegurado de la póliza
+}
+
+docs {
+  Value object MontoAprobado (paso 2): el monto aprobado no puede superar el valor asegurado de la póliza.
+  Usa el siniestro creado en el request 05 (variable siniestroC).
+}

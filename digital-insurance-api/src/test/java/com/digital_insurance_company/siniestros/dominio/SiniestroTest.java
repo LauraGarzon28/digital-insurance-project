@@ -1,4 +1,4 @@
-package com.digital_insurance_company.siniestros;
+package com.digital_insurance_company.siniestros.dominio;
 
 import org.junit.jupiter.api.Test;
 
