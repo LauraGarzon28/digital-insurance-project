@@ -14,4 +14,14 @@
 **Trazabilidad:**
 Se han generado commits independientes con el mensaje `feat(siniestros): ...` para respaldar el paso a paso detallado en esta bitácora, y se ejecutaron las pruebas unitarias que respaldan las reglas de negocio de `MontoAprobado` y la lógica de rechazo de la póliza en el servicio de evaluación.
 
-Las capturas de código y pruebas de IntelliJ deben subirse a la carpeta `capturas/` adjunta a este directorio.
+**Capturas de evidencia (en `capturas/`):**
+
+| Paso | Captura |
+|---|---|
+| 1 · Lenguaje Ubicuo | `Evidencia_clase_siniestro.png` (entidad `Siniestro`) |
+| 2 · Value Object | `2-monto-aprobado.png` (`MontoAprobado`) |
+| 3 · Servicio de dominio | `3-evaluacion-siniestro-service.png` (`EvaluacionSiniestroService`) |
+| 4 · Límite del agregado | `evidencia_siniestro_metodos_de_estado.png` (guardas de estado del agregado) |
+| 5 · Factory | `5-siniestro-factory.png` (`SiniestroFactory`) |
+| Pruebas | `6-siniestro-test.png` (`SiniestroTest` en verde) |
+| Estados (apoyo) | `7-estados.png` (`EstadoSiniestro`, `EstadoPolizaReferencia`) |

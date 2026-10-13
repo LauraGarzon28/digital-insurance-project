@@ -1,4 +1,4 @@
-package com.digital_insurance_company.poliza;
+package com.digital_insurance_company.poliza.dominio;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;

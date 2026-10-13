@@ -1,4 +1,4 @@
-package com.digital_insurance_company.poliza;
+package com.digital_insurance_company.poliza.dominio;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -52,6 +52,7 @@ public class Poliza {
     public UUID cotizacionId() { return cotizacionId; }
     public ValorAsegurado valorAsegurado() { return valorAsegurado; }
     public VigenciaPoliza vigencia() { return vigencia; }
+    public boolean cancelada() { return cancelada; }
 
     @Override 
     public boolean equals(Object o){
