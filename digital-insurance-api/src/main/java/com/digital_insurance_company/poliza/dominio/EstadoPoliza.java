@@ -1,4 +1,4 @@
-package com.digital_insurance_company.poliza;
+package com.digital_insurance_company.poliza.dominio;
 
 public enum EstadoPoliza {
 

@@ -14,16 +14,19 @@ import com.digital_insurance_company.cliente.aplicacion.RepositorioClientes;
 public class CotizacionConfiguration {
 
     @Bean
+    @SuppressWarnings("unused")
     CotizacionFactory cotizacionFactory() {
         return new CotizacionFactory();
     }
 
     @Bean
+    @SuppressWarnings("unused")
     EvaluacionRiesgoService evaluacionRiesgoService() {
         return new EvaluacionRiesgoService();
     }
 
     @Bean
+    @SuppressWarnings("unused")
     CotizacionUseCase cotizacionUseCase(
             CotizacionFactory cotizacionFactory,
             EvaluacionRiesgoService evaluacionRiesgoService,
