@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.digital_insurance_company.compartido.CotizacionNoEncontradaException;
+import com.digital_insurance_company.cliente.aplicacion.ClienteNoEncontradoException;
 
 @RestControllerAdvice
 public class CotizacionControllerAdvice {
@@ -34,6 +35,13 @@ public class CotizacionControllerAdvice {
         @ExceptionHandler(CotizacionNoEncontradaException.class)
         public ResponseEntity<Map<String, String>> manejarNoEncontrada(
                         CotizacionNoEncontradaException exception) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body(Map.of("mensaje", exception.getMessage()));
+        }
+
+        @ExceptionHandler(ClienteNoEncontradoException.class)
+        public ResponseEntity<Map<String, String>> manejarClienteNoEncontrado(
+                        ClienteNoEncontradoException exception) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                                 .body(Map.of("mensaje", exception.getMessage()));
         }

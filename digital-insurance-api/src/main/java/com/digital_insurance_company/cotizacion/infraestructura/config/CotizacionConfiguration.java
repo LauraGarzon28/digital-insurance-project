@@ -8,6 +8,7 @@ import com.digital_insurance_company.cotizacion.aplicacion.CotizacionUseCase;
 import com.digital_insurance_company.cotizacion.aplicacion.RepositorioCotizaciones;
 import com.digital_insurance_company.cotizacion.dominio.CotizacionFactory;
 import com.digital_insurance_company.cotizacion.dominio.EvaluacionRiesgoService;
+import com.digital_insurance_company.cliente.aplicacion.RepositorioClientes;
 
 @Configuration
 public class CotizacionConfiguration {
@@ -29,10 +30,12 @@ public class CotizacionConfiguration {
     CotizacionUseCase cotizacionUseCase(
             CotizacionFactory cotizacionFactory,
             EvaluacionRiesgoService evaluacionRiesgoService,
-            RepositorioCotizaciones repositorioCotizaciones) {
+            RepositorioCotizaciones repositorioCotizaciones,
+            RepositorioClientes repositorioClientes) {
         return new CotizacionApplicationService(
                 cotizacionFactory,
                 evaluacionRiesgoService,
-                repositorioCotizaciones);
+                repositorioCotizaciones,
+                repositorioClientes);
     }
 }
