@@ -34,3 +34,7 @@ target/
 # Node / Frontend (si llegaran a tener)
 node_modules/
 dist/
+
+# Informes que generan VerificarTalleres.java / VerificarProyecto.java.
+# No se versionan: describen un commit concreto y quedarian obsoletos.
+informe-verificacion-*.md

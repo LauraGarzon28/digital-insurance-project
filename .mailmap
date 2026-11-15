@@ -1,0 +1,8 @@
+# Unifica identidades duplicadas en el historial del proyecto.
+# Sin esto, `git shortlog -sne --all` reporta dos personas distintas
+# para Laura (una por haber hecho merge desde la web de GitHub) y dos
+# correos para Nicolás. El ritual de corte pide resolverlo antes de
+# obtener el hash del commit.
+
+Laura Garzon <148497204+LauraGarzon28@users.noreply.github.com> Laura Valentina Garzón <148497204+LauraGarzon28@users.noreply.github.com>
+Nicolás Ruiz <sergio.ruiz01@uptc.edu.co> <120435681+S3RGiii@users.noreply.github.com>
