@@ -1,0 +1,122 @@
+{
+  "info": {
+    "name": "Pólizas - G5 (Dev 2)",
+    "description": "Flujo de prueba end-to-end del subdominio Pólizas, en modo standalone (sin depender del módulo de Cotización): 1 siembra una cotización 'aceptada' de prueba, 2 emite la póliza, 3-5 la consultan/renuevan/cancelan, 6-8 prueban caminos de error.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8082" },
+    { "key": "cotizacionId", "value": "" },
+    { "key": "cotizacionRechazadaId", "value": "" },
+    { "key": "polizaId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Sembrar cotizacion aceptada (prueba)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/test/cotizaciones-aceptadas", "host": ["{{baseUrl}}"], "path": ["api","test","cotizaciones-aceptadas"] },
+        "body": { "mode": "raw", "raw": "{\n  \"valorAsegurado\": 80000000,\n  \"aceptada\": true\n}" }
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('status 200', () => pm.response.to.have.status(200));",
+          "const data = pm.response.json();",
+          "pm.collectionVariables.set('cotizacionId', data.cotizacionId);"
+        ] }
+      }]
+    },
+    {
+      "name": "2. Emitir poliza",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/polizas", "host": ["{{baseUrl}}"], "path": ["api","polizas"] },
+        "body": { "mode": "raw", "raw": "{\n  \"cotizacionId\": \"{{cotizacionId}}\",\n  \"fechaInicio\": \"2026-01-01\",\n  \"fechaFin\": \"2026-12-31\"\n}" }
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('status 200', () => pm.response.to.have.status(200));",
+          "const data = pm.response.json();",
+          "pm.test('estado VIGENTE', () => pm.expect(data.estado).to.eql('VIGENTE'));",
+          "pm.collectionVariables.set('polizaId', data.id);"
+        ] }
+      }]
+    },
+    {
+      "name": "3. Consultar poliza",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api/polizas/{{polizaId}}", "host": ["{{baseUrl}}"], "path": ["api","polizas","{{polizaId}}"] }
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 200', () => pm.response.to.have.status(200));"] } }]
+    },
+    {
+      "name": "4. Renovar poliza",
+      "request": {
+        "method": "POST",
+        "url": { "raw": "{{baseUrl}}/api/polizas/{{polizaId}}/renovaciones", "host": ["{{baseUrl}}"], "path": ["api","polizas","{{polizaId}}","renovaciones"] }
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('status 200', () => pm.response.to.have.status(200));",
+          "const data = pm.response.json();",
+          "pm.test('fechaInicio avanzo', () => pm.expect(data.fechaInicio).to.eql('2027-01-01'));"
+        ] }
+      }]
+    },
+    {
+      "name": "5. Cancelar poliza",
+      "request": {
+        "method": "POST",
+        "url": { "raw": "{{baseUrl}}/api/polizas/{{polizaId}}/cancelacion", "host": ["{{baseUrl}}"], "path": ["api","polizas","{{polizaId}}","cancelacion"] }
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('status 200', () => pm.response.to.have.status(200));",
+          "const data = pm.response.json();",
+          "pm.test('estado CANCELADA', () => pm.expect(data.estado).to.eql('CANCELADA'));"
+        ] }
+      }]
+    },
+    {
+      "name": "6. Sembrar cotizacion NO aceptada (prueba)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/test/cotizaciones-aceptadas", "host": ["{{baseUrl}}"], "path": ["api","test","cotizaciones-aceptadas"] },
+        "body": { "mode": "raw", "raw": "{\n  \"valorAsegurado\": 50000000,\n  \"aceptada\": false\n}" }
+      },
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "const data = pm.response.json();",
+          "pm.collectionVariables.set('cotizacionRechazadaId', data.cotizacionId);"
+        ] }
+      }]
+    },
+    {
+      "name": "7. (Error esperado) Emitir desde cotizacion NO aceptada",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/polizas", "host": ["{{baseUrl}}"], "path": ["api","polizas"] },
+        "body": { "mode": "raw", "raw": "{\n  \"cotizacionId\": \"{{cotizacionRechazadaId}}\",\n  \"fechaInicio\": \"2026-01-01\",\n  \"fechaFin\": \"2026-12-31\"\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 409 Conflict', () => pm.response.to.have.status(409));"] } }]
+    },
+    {
+      "name": "8. (Error esperado) Consultar poliza inexistente",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api/polizas/00000000-0000-0000-0000-000000000000", "host": ["{{baseUrl}}"], "path": ["api","polizas","00000000-0000-0000-0000-000000000000"] }
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('status 404 Not Found', () => pm.response.to.have.status(404));"] } }]
+    }
+  ]
+}

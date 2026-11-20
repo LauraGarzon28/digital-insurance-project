@@ -1,0 +1,21 @@
+meta {
+  name: 6. Sembrar cotizacion NO aceptada
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/test/cotizaciones-aceptadas
+  body: json
+}
+
+body:json {
+  {
+    "valorAsegurado": 50000000,
+    "aceptada": false
+  }
+}
+
+script:post-response {
+  bru.setVar("cotizacionRechazadaId", res.body.cotizacionId);
+}

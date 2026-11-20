@@ -1,0 +1,15 @@
+services:
+  polizas-db:
+    image: postgres:16
+    container_name: polizas-db
+    environment:
+      POSTGRES_DB: polizas_db
+      POSTGRES_USER: polizas_user
+      POSTGRES_PASSWORD: polizas_pass
+    ports:
+      - "5433:5432"   # distinto del 5432 por defecto, para no chocar con otro Postgres local
+    volumes:
+      - polizas_db_data:/var/lib/postgresql/data
+
+volumes:
+  polizas_db_data:
