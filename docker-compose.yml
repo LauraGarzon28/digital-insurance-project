@@ -1,0 +1,56 @@
+services:
+  auth-db:
+    image: postgres:17-alpine
+    container_name: auth-db
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - auth_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  clientes-db:
+    image: postgres:17-alpine
+    container_name: clientes-db
+    environment:
+      POSTGRES_DB: clientes_db
+      POSTGRES_USER: clientes_user
+      POSTGRES_PASSWORD: ${CLIENTES_DB_PASSWORD}
+    ports:
+      - "5434:5432"
+    volumes:
+      - clientes_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clientes_user -d clientes_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  cotizaciones-db:
+    image: postgres:17-alpine
+    container_name: cotizaciones-db
+    environment:
+      POSTGRES_DB: cotizaciones_db
+      POSTGRES_USER: cotizaciones_user
+      POSTGRES_PASSWORD: ${COTIZACIONES_DB_PASSWORD}
+    ports:
+      - "5435:5432"
+    volumes:
+      - cotizaciones_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cotizaciones_user -d cotizaciones_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  auth_data:
+  clientes_data:
+  cotizaciones_data:
