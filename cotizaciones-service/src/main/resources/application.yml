@@ -1,0 +1,35 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: cotizaciones-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5435/cotizaciones_db}
+    username: ${DB_USER:cotizaciones_user}
+    password: ${DB_PASSWORD:cotizaciones_pass}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${JWK_SET_URI:http://localhost:8081/auth/jwks}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+clientes:
+  base-url: ${CLIENTES_URL:http://clientes-service}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.cotizaciones_service.compartido.ClienteNoEncontradoException;
+import com.cotizaciones_service.compartido.ClientesNoDisponibleException;
 import com.cotizaciones_service.compartido.CotizacionNoEncontradaException;
 
 @RestControllerAdvice
@@ -50,6 +51,13 @@ public class CotizacionControllerAdvice {
         public ResponseEntity<Map<String, String>> manejarReglaDeNegocio(
                         RuntimeException exception) {
                 return ResponseEntity.badRequest()
+                                .body(Map.of("mensaje", exception.getMessage()));
+        }
+
+        @ExceptionHandler(ClientesNoDisponibleException.class)
+        public ResponseEntity<Map<String, String>> manejarClientesNoDisponible(
+                        ClientesNoDisponibleException exception) {
+                return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                                 .body(Map.of("mensaje", exception.getMessage()));
         }
 }

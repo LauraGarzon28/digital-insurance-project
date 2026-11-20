@@ -14,28 +14,25 @@ import com.cotizaciones_service.cotizacion.dominio.EvaluacionRiesgoService;
 public class CotizacionConfiguration {
 
     @Bean
-    @SuppressWarnings("unused")
     CotizacionFactory cotizacionFactory() {
         return new CotizacionFactory();
     }
 
     @Bean
-    @SuppressWarnings("unused")
     EvaluacionRiesgoService evaluacionRiesgoService() {
         return new EvaluacionRiesgoService();
     }
 
     @Bean
-    @SuppressWarnings("unused")
     CotizacionUseCase cotizacionUseCase(
             CotizacionFactory cotizacionFactory,
             EvaluacionRiesgoService evaluacionRiesgoService,
             RepositorioCotizaciones repositorioCotizaciones,
-            ConsultaClientePort consultaClientePort) {
+            ConsultaClientePort consultaCliente) {
         return new CotizacionApplicationService(
                 cotizacionFactory,
                 evaluacionRiesgoService,
                 repositorioCotizaciones,
-                consultaClientePort);
+                consultaCliente);
     }
 }
