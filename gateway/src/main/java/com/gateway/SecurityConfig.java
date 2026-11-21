@@ -1,4 +1,4 @@
-package main.java.com.gateway;
+package com.gateway;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +16,11 @@ public class SecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(a -> a
-                        .pathMatchers("/api/auth/login", "/api/auth/register").permitAll()
-                        .pathMatchers("/actuator/health/**").permitAll()
+                        .pathMatchers(
+                                "/api/auth/login",
+                                "/api/auth/register",
+                                "/api/auth/jwks",
+                                "/actuator/health/**").permitAll()
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(o -> o.jwt(Customizer.withDefaults()))
                 .build();
