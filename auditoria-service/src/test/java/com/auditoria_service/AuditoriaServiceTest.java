@@ -55,7 +55,7 @@ class AuditoriaServiceTest {
     private final AuditoriaService servicio = new AuditoriaService(registro);
 
     private EventoSiniestro evento(UUID mensajeId, String tipo, String estado, BigDecimal monto) {
-        return new EventoSiniestro(mensajeId, tipo, SINIESTRO_ID, POLIZA_ID, estado, monto, Instant.now());
+        return new EventoSiniestro(mensajeId, tipo, SINIESTRO_ID, POLIZA_ID, estado, monto, null, Instant.now());
     }
 
     @Test
@@ -92,7 +92,7 @@ class AuditoriaServiceTest {
     @Test
     void unEventoSinMensajeIdNoPuedeSerIdempotente() {
         EventoSiniestro sinId = new EventoSiniestro(
-                null, "SiniestroReportado", SINIESTRO_ID, POLIZA_ID, "REPORTADO", null, Instant.now());
+                null, "SiniestroReportado", SINIESTRO_ID, POLIZA_ID, "REPORTADO", null, null, Instant.now());
 
         assertThrows(IllegalArgumentException.class, () -> servicio.registrar(sinId));
     }

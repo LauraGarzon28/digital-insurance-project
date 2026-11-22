@@ -10,5 +10,7 @@ public interface PublicadorEventosSiniestro {
 
     void siniestroReportado(Siniestro siniestro);
 
+    void siniestroAsignado(Siniestro siniestro);
+
     void siniestroResuelto(Siniestro siniestro);
 }

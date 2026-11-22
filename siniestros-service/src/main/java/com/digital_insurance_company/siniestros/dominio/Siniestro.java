@@ -9,6 +9,7 @@ public class Siniestro {
     private final String descripcion;
     private EstadoSiniestro estado;
     private final BigDecimal valorAseguradoPoliza;
+    private UUID ajustadorId;
 
     private MontoAprobado montoAprobado;
 
@@ -22,10 +23,24 @@ public class Siniestro {
     }
 
     public void marcarEnEvaluacion() {
+        if (this.estado == EstadoSiniestro.EN_EVALUACION) {
+            return;
+        }
         if (this.estado != EstadoSiniestro.REPORTADO) {
             throw new IllegalStateException("Solo un siniestro reportado puede pasar a evaluación");
         }
         this.estado = EstadoSiniestro.EN_EVALUACION;
+    }
+
+    public void asignarAjustador(UUID ajustadorId) {
+        if (ajustadorId == null) {
+            throw new IllegalArgumentException("El ID del ajustador es requerido");
+        }
+        if (this.estado != EstadoSiniestro.REPORTADO) {
+            throw new IllegalStateException("Solo un siniestro reportado puede ser asignado");
+        }
+        this.ajustadorId = ajustadorId;
+        marcarEnEvaluacion();
     }
 
     public void aprobar(BigDecimal valorAprobado) {
@@ -43,8 +58,9 @@ public class Siniestro {
         this.estado = EstadoSiniestro.RECHAZADO;
     }
 
-    void restaurar(EstadoSiniestro estado, BigDecimal montoAprobado) {
+    void restaurar(EstadoSiniestro estado, UUID ajustadorId, BigDecimal montoAprobado) {
         this.estado = estado;
+        this.ajustadorId = ajustadorId;
         if (montoAprobado != null) {
             this.montoAprobado = new MontoAprobado(montoAprobado, this.valorAseguradoPoliza);
         }
@@ -56,4 +72,5 @@ public class Siniestro {
     public EstadoSiniestro getEstado() { return estado; }
     public BigDecimal getValorAseguradoPoliza() { return valorAseguradoPoliza; }
     public MontoAprobado getMontoAprobado() { return montoAprobado; }
+    public UUID getAjustadorId() { return ajustadorId; }
 }

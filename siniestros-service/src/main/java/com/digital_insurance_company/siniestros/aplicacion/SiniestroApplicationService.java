@@ -3,6 +3,7 @@ package com.digital_insurance_company.siniestros.aplicacion;
 import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.List;
 
 import com.digital_insurance_company.siniestros.dominio.EstadoPolizaReferencia;
 import com.digital_insurance_company.siniestros.dominio.EstadoSiniestro;
@@ -53,8 +54,26 @@ public class SiniestroApplicationService implements SiniestroUseCase {
     }
 
     @Override
+    public Siniestro asignarAjustador(UUID siniestroId, UUID ajustadorId) {
+        Siniestro siniestro = buscarOLanzar(siniestroId);
+        siniestro.asignarAjustador(ajustadorId);
+        Siniestro guardado = repositorio.guardar(siniestro);
+        publicador.siniestroAsignado(guardado);
+        return guardado;
+    }
+
+    @Override
     public Siniestro consultarSiniestro(UUID siniestroId) {
         return buscarOLanzar(siniestroId);
+    }
+
+    @Override
+    public List<Siniestro> listarSiniestros(UUID ajustadorId, UUID polizaId, EstadoSiniestro estado) {
+        return repositorio.listarTodos().stream()
+                .filter(s -> ajustadorId == null || ajustadorId.equals(s.getAjustadorId()))
+                .filter(s -> polizaId == null || polizaId.equals(s.getPolizaId()))
+                .filter(s -> estado == null || estado.equals(s.getEstado()))
+                .toList();
     }
 
     private Siniestro buscarOLanzar(UUID siniestroId) {

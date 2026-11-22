@@ -31,6 +31,10 @@ class SiniestroControllerTest {
         }
 
         @Override
+        public void siniestroAsignado(Siniestro siniestro) {
+        }
+
+        @Override
         public void siniestroResuelto(Siniestro siniestro) {
         }
     }
@@ -73,6 +77,23 @@ class SiniestroControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(siniestro.getId().toString()))
                 .andExpect(jsonPath("$.estado").value("REPORTADO"));
+    }
+
+    @Test
+    void asignaUnAjustadorYDejaElSiniestroEnEvaluacion() throws Exception {
+        Siniestro siniestro = guardarSiniestro();
+        UUID ajustadorId = UUID.randomUUID();
+
+        mockMvc.perform(post("/api/siniestros/" + siniestro.getId() + "/asignacion")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "ajustadorId": "%s"
+                                }
+                                """.formatted(ajustadorId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.estado").value("EN_EVALUACION"))
+                .andExpect(jsonPath("$.ajustadorId").value(ajustadorId.toString()));
     }
 
     @Test

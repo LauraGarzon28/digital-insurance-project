@@ -2,6 +2,7 @@ package com.auth_service.web;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.http.ResponseEntity;
@@ -63,6 +64,17 @@ public class AuthController {
     @GetMapping("/jwks")
     public Map<String, Object> jwks() {
         return new JWKSet(rsaKey.toPublicJWK()).toJSONObject();   // solo la parte pública
+    }
+
+    @GetMapping("/usuarios/ajustadores")
+    public List<UsuarioResponse> listarAjustadores() {
+        return usuarios.findDistinctByRoles(Rol.AJUSTADOR).stream()
+                .map(usuario -> new UsuarioResponse(
+                        usuario.getId(),
+                        usuario.getUsername(),
+                        usuario.getCorreo(),
+                        usuario.getRoles()))
+                .toList();
     }
 
     private ResponseEntity<UsuarioResponse> crear(String username, String correo,

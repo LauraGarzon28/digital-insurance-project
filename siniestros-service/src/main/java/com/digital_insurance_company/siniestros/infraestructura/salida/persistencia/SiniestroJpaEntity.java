@@ -36,6 +36,9 @@ public class SiniestroJpaEntity {
     @Column(name = "monto_aprobado", precision = 19, scale = 2)
     private BigDecimal montoAprobado;
 
+    @Column(name = "ajustador_id")
+    private UUID ajustadorId;
+
     protected SiniestroJpaEntity() {
     }
 
@@ -49,6 +52,7 @@ public class SiniestroJpaEntity {
         entidad.montoAprobado = siniestro.getMontoAprobado() == null
                 ? null
                 : siniestro.getMontoAprobado().valor();
+        entidad.ajustadorId = siniestro.getAjustadorId();
         return entidad;
     }
 
@@ -58,4 +62,5 @@ public class SiniestroJpaEntity {
     public EstadoSiniestro getEstado() { return estado; }
     public BigDecimal getValorAseguradoPoliza() { return valorAseguradoPoliza; }
     public BigDecimal getMontoAprobado() { return montoAprobado; }
+    public UUID getAjustadorId() { return ajustadorId; }
 }

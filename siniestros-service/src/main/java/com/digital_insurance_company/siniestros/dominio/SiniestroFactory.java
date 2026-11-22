@@ -10,9 +10,10 @@ public class SiniestroFactory {
      * creación: el objeto ya existía y su invariante vive en el agregado.
      */
     public Siniestro reconstituir(UUID id, UUID polizaId, String descripcion,
-            EstadoSiniestro estado, BigDecimal valorAseguradoPoliza, BigDecimal montoAprobado) {
+            EstadoSiniestro estado, BigDecimal valorAseguradoPoliza, UUID ajustadorId,
+            BigDecimal montoAprobado) {
         Siniestro siniestro = new Siniestro(id, polizaId, descripcion, valorAseguradoPoliza);
-        siniestro.restaurar(estado, montoAprobado);
+        siniestro.restaurar(estado, ajustadorId, montoAprobado);
         return siniestro;
     }
 

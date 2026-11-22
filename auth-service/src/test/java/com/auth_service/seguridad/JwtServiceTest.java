@@ -31,11 +31,11 @@ class JwtServiceTest {
         var rsa = new RSAKey.Builder(publica).privateKey(privada).keyID(JwtConfig.KEY_ID).build();
         var servicio = new JwtService(
                 new NimbusJwtEncoder(new ImmutableJWKSet<>(new JWKSet(rsa))), 60);
-        var usuario = new Usuario("ana", "ana@example.com", "hash", Set.of(Rol.SUSCRIPTOR));
+        var usuario = new Usuario("ana", "ana@example.com", "hash", Set.of(Rol.ASESOR));
 
         Jwt jwt = NimbusJwtDecoder.withPublicKey(publica).build().decode(servicio.generar(usuario));
 
         assertEquals(usuario.getId().toString(), jwt.getSubject());
-        assertEquals(List.of("SUSCRIPTOR"), jwt.getClaimAsStringList("roles"));
+        assertEquals(List.of("ASESOR"), jwt.getClaimAsStringList("roles"));
     }
 }

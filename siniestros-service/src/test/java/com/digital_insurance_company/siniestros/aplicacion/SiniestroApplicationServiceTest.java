@@ -46,6 +46,11 @@ class SiniestroApplicationServiceTest {
         public Optional<Siniestro> buscarPorId(UUID id) {
             return Optional.ofNullable(almacen.get(id));
         }
+
+        @Override
+        public java.util.List<Siniestro> listarTodos() {
+            return new java.util.ArrayList<>(almacen.values());
+        }
     }
 
     /**
@@ -55,11 +60,17 @@ class SiniestroApplicationServiceTest {
     private static class PublicadorEventosFake implements PublicadorEventosSiniestro {
 
         final List<EstadoSiniestro> reportados = new ArrayList<>();
+        final List<UUID> asignados = new ArrayList<>();
         final List<EstadoSiniestro> resueltos = new ArrayList<>();
 
         @Override
         public void siniestroReportado(Siniestro siniestro) {
             reportados.add(siniestro.getEstado());
+        }
+
+        @Override
+        public void siniestroAsignado(Siniestro siniestro) {
+            asignados.add(siniestro.getAjustadorId());
         }
 
         @Override
@@ -87,6 +98,18 @@ class SiniestroApplicationServiceTest {
 
         assertEquals(List.of(EstadoSiniestro.REPORTADO), publicador.reportados);
         assertTrue(publicador.resueltos.isEmpty());
+    }
+
+    @Test
+    void asignarAjustadorGuardaLaAsignacionYPasaAEnEvaluacion() {
+        Siniestro siniestro = casosDeUso.reportarSiniestro(POLIZA_ID, "Choque frontal", new BigDecimal("50000"));
+        UUID ajustadorId = UUID.randomUUID();
+
+        Siniestro asignado = casosDeUso.asignarAjustador(siniestro.getId(), ajustadorId);
+
+        assertEquals(ajustadorId, asignado.getAjustadorId());
+        assertEquals(EstadoSiniestro.EN_EVALUACION, asignado.getEstado());
+        assertEquals(List.of(ajustadorId), publicador.asignados);
     }
 
     @Test
