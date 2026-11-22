@@ -34,3 +34,8 @@ target/
 # Node / Frontend (si llegaran a tener)
 node_modules/
 dist/
+
+# Secretos locales
+.env
+keys/
+*.pem

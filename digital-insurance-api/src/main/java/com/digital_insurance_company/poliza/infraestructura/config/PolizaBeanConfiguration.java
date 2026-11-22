@@ -1,4 +1,4 @@
-package com.digital_insurance_company.cotizacion.infraestructura.config;
+package com.digital_insurance_company.poliza.infraestructura.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

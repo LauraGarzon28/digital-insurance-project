@@ -1,0 +1,8 @@
+package com.clientes_service.cliente.aplicacion;
+
+public class ClienteYaRegistradoException extends RuntimeException {
+
+    public ClienteYaRegistradoException(String numeroDocumento) {
+        super("Ya existe un cliente con número de documento " + numeroDocumento);
+    }
+}
