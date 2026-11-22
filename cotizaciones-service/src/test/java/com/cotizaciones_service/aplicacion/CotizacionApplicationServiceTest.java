@@ -39,6 +39,14 @@ class CotizacionApplicationServiceTest {
                 public Optional<Cotizacion> buscarPorId(UUID id) {
                     return Optional.ofNullable(cotizacion);
                 }
+
+                @Override
+                public java.util.List<Cotizacion> listar(UUID clienteId, String estado) {
+                    if (cotizacion == null) return java.util.List.of();
+                    if (clienteId != null && !clienteId.equals(cotizacion.clienteId())) return java.util.List.of();
+                    if (estado != null && !estado.isBlank() && !estado.equals(cotizacion.estado().name())) return java.util.List.of();
+                    return java.util.List.of(cotizacion);
+                }
             }, id -> true);
     private final ReglasSuscripcion reglas = new ReglasSuscripcion(
             "v1", new BigDecimal("0.02"), 70);

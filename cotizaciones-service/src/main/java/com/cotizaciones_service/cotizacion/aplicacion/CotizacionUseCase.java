@@ -2,6 +2,7 @@ package com.cotizaciones_service.cotizacion.aplicacion;
 
 import java.util.UUID;
 import java.util.Optional;
+import java.util.List;
 
 import com.cotizaciones_service.cotizacion.dominio.Cotizacion;
 import com.cotizaciones_service.cotizacion.dominio.ReglasSuscripcion;
@@ -20,4 +21,6 @@ public interface CotizacionUseCase {
     Cotizacion rechazar(UUID id);
 
     Cotizacion aceptar(UUID id);
+
+    List<Cotizacion> listar(UUID clienteId, String estado);
 }

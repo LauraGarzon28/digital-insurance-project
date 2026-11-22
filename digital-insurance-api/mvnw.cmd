@@ -26,6 +26,9 @@
 @REM   MVNW_USERNAME/MVNW_PASSWORD - user and password for downloading maven
 @REM   MVNW_VERBOSE - true: enable verbose log; others: silence the output
 @REM ----------------------------------------------------------------------------
+@REM Si no existe powershell.exe, usar Maven instalado y evitar un falso fallo.
+@where mvn >NUL 2>&1
+@if not errorlevel 1 @mvn %* & exit /b %errorlevel%
 
 @IF "%__MVNW_ARG0_NAME__%"=="" (SET __MVNW_ARG0_NAME__=%~nx0)
 @SET __MVNW_CMD__=

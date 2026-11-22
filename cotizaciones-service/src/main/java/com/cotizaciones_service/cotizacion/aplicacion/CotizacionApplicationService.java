@@ -3,6 +3,7 @@ package com.cotizaciones_service.cotizacion.aplicacion;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 import com.cotizaciones_service.compartido.ClienteNoEncontradoException;
 import com.cotizaciones_service.compartido.CotizacionNoEncontradaException;
@@ -70,6 +71,11 @@ public class CotizacionApplicationService implements CotizacionUseCase {
         Cotizacion cotizacion = obtener(id);
         cotizacion.aceptar();
         return repositorioCotizaciones.guardar(cotizacion);
+    }
+
+    @Override
+    public List<Cotizacion> listar(UUID clienteId, String estado) {
+        return repositorioCotizaciones.listar(clienteId, estado);
     }
 
     private Cotizacion obtener(UUID id) {
