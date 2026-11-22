@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: auth_db
       POSTGRES_USER: auth_user
-      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD:-auth_pass}
     ports:
       - "5433:5432"
     volumes:
@@ -22,7 +22,7 @@ services:
     environment:
       POSTGRES_DB: clientes_db
       POSTGRES_USER: clientes_user
-      POSTGRES_PASSWORD: ${CLIENTES_DB_PASSWORD}
+      POSTGRES_PASSWORD: ${CLIENTES_DB_PASSWORD:-clientes_pass}
     ports:
       - "5434:5432"
     volumes:
@@ -39,7 +39,7 @@ services:
     environment:
       POSTGRES_DB: cotizaciones_db
       POSTGRES_USER: cotizaciones_user
-      POSTGRES_PASSWORD: ${COTIZACIONES_DB_PASSWORD}
+      POSTGRES_PASSWORD: ${COTIZACIONES_DB_PASSWORD:-cotizaciones_pass}
     ports:
       - "5435:5432"
     volumes:
@@ -86,7 +86,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:4-management-alpine
-    container_name: rabbitmq
+    container_name: insurance-rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBIT_USER:-guest}
       RABBITMQ_DEFAULT_PASS: ${RABBIT_PASSWORD:-guest}

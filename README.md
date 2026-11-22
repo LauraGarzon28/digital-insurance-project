@@ -41,7 +41,7 @@ Levanta cinco PostgreSQL y RabbitMQ:
 | `cotizaciones-db` | 5435 | `cotizaciones_db` |
 | `siniestros-db` | 5436 | `siniestros_db` |
 | `auditoria-db` | 5437 | `auditoria_db` |
-| `rabbitmq` | 5672 · 15672 (consola) | — |
+| `insurance-rabbitmq` | 5672 · 15672 (consola) | — |
 
 Esperar a que todos reporten `healthy`: `docker compose ps`.
 
@@ -298,3 +298,5 @@ Detalle completo, diagramas C4 y decisiones en [`docs/ARQUITECTURA.md`](docs/ARQ
 | `404` en `/api/auditoria/...` | El consumidor aún no procesó el evento: esperar y repetir |
 | Gateway y monolito chocan en el puerto | Ya resuelto: el monolito usa 8090 desde §2.3 |
 | `403` en cualquier endpoint | Falta el header `Authorization: Bearer <token>` |
+| `Conflict. The container name "/rabbitmq" is already in use` | Hay otro RabbitMQ de un proyecto anterior. Este compose usa `insurance-rabbitmq` para no chocar; si aun así aparece, `docker rm <nombre>` |
+| RabbitMQ arranca pero el consumidor no recibe nada | Verificar que la cola `auditoria.siniestros.queue` exista en <http://localhost:15672> → Queues |
