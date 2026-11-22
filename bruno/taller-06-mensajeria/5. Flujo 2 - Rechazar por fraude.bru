@@ -1,0 +1,42 @@
+meta {
+  name: Flujo 2 - Rechazar por fraude
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/siniestros/{{flujo2SiniestroId}}/evaluacion
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "estadoPoliza": "ACTIVA",
+    "esFraude": true,
+    "montoPropuesto": 0
+  }
+}
+
+tests {
+  test("El fraude se rechaza aun con la póliza activa", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.estado).to.equal("RECHAZADO");
+  });
+
+  test("Un rechazo no aprueba monto alguno", function() {
+    expect(res.body.montoAprobado).to.be.null;
+  });
+}
+
+docs {
+  ## Flujo 2 · Rechazar por fraude
+
+  Regla de dominio: `esFraude = true` rechaza el siniestro sin importar el estado
+  de la póliza. También publica `SiniestroResuelto`, con estado `RECHAZADO`.
+}

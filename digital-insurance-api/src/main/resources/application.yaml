@@ -1,3 +1,6 @@
 spring:
   application:
     name: digital-insurance-company
+
+server:
+  port: 8090

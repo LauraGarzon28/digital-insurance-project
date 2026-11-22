@@ -35,15 +35,22 @@ spring:
               filters:
                 - RewritePath=/api/(?<segment>.*), /$\{segment}
 
+            - id: siniestros
+              uri: lb://siniestros-service
+              predicates:
+                - Path=/api/siniestros/**
+
+            - id: auditoria
+              uri: lb://auditoria-service
+              predicates:
+                - Path=/api/auditoria/**
+              filters:
+                - RewritePath=/api/(?<segment>.*), /$\{segment}
+
             - id: polizas
               uri: ${MONOLITO_URL:http://localhost:8090}
               predicates:
                 - Path=/api/polizas/**
-
-            - id: siniestros
-              uri: ${MONOLITO_URL:http://localhost:8090}
-              predicates:
-                - Path=/api/siniestros/**
 
 eureka:
   client:
@@ -60,5 +67,5 @@ management:
 
 logging:
   level:
-    org.springframework.cloud.gateway: DEBUG
-    org.springframework.security: DEBUG
+    org.springframework.cloud.gateway: INFO
+    org.springframework.security: INFO

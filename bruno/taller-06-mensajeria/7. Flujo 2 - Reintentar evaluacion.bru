@@ -1,0 +1,40 @@
+meta {
+  name: Flujo 2 - Reintentar la evaluación (debe fallar)
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/siniestros/{{flujo2SiniestroId}}/evaluacion
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "estadoPoliza": "ACTIVA",
+    "esFraude": false,
+    "montoPropuesto": 5000
+  }
+}
+
+tests {
+  test("Un siniestro resuelto no se vuelve a evaluar", function() {
+    expect(res.status).to.equal(400);
+    expect(res.body.mensaje).to.equal("Solo un siniestro reportado puede pasar a evaluación");
+  });
+}
+
+docs {
+  ## Flujo 2 · Guarda del agregado
+
+  El ciclo de vida es final: un siniestro resuelto no se re-evalúa. Esto también
+  evita publicar hechos duplicados por reintentos del usuario.
+
+  Después de este paso, repetir el paso 6: la auditoría debe seguir con 2 eventos.
+}

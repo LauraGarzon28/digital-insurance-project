@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: auth_db
       POSTGRES_USER: auth_user
-      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD:-auth_pass}
     ports:
       - "5433:5432"
     volumes:
@@ -22,7 +22,7 @@ services:
     environment:
       POSTGRES_DB: clientes_db
       POSTGRES_USER: clientes_user
-      POSTGRES_PASSWORD: ${CLIENTES_DB_PASSWORD}
+      POSTGRES_PASSWORD: ${CLIENTES_DB_PASSWORD:-clientes_pass}
     ports:
       - "5434:5432"
     volumes:
@@ -39,7 +39,7 @@ services:
     environment:
       POSTGRES_DB: cotizaciones_db
       POSTGRES_USER: cotizaciones_user
-      POSTGRES_PASSWORD: ${COTIZACIONES_DB_PASSWORD}
+      POSTGRES_PASSWORD: ${COTIZACIONES_DB_PASSWORD:-cotizaciones_pass}
     ports:
       - "5435:5432"
     volumes:
@@ -50,7 +50,58 @@ services:
       timeout: 3s
       retries: 10
 
+  siniestros-db:
+    image: postgres:17-alpine
+    container_name: siniestros-db
+    environment:
+      POSTGRES_DB: siniestros_db
+      POSTGRES_USER: siniestros_user
+      POSTGRES_PASSWORD: ${SINIESTROS_DB_PASSWORD:-siniestros_pass}
+    ports:
+      - "5436:5432"
+    volumes:
+      - siniestros_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U siniestros_user -d siniestros_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  auditoria-db:
+    image: postgres:17-alpine
+    container_name: auditoria-db
+    environment:
+      POSTGRES_DB: auditoria_db
+      POSTGRES_USER: auditoria_user
+      POSTGRES_PASSWORD: ${AUDITORIA_DB_PASSWORD:-auditoria_pass}
+    ports:
+      - "5437:5432"
+    volumes:
+      - auditoria_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auditoria_user -d auditoria_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    container_name: insurance-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBIT_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBIT_PASSWORD:-guest}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
 volumes:
   auth_data:
   clientes_data:
   cotizaciones_data:
+  siniestros_data:
+  auditoria_data:

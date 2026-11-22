@@ -1,0 +1,52 @@
+meta {
+  name: Flujo 1 - Decisión de siniestro y auditoría asíncrona
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/siniestros
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "polizaId": "33333333-3333-3333-3333-333333333333",
+    "descripcion": "Choque frontal en vía urbana",
+    "valorAseguradoPoliza": 50000
+  }
+}
+
+script:post-response {
+  if (res.status === 201) {
+    bru.setVar("siniestroId", res.body.id);
+    bru.setVar("flujo1SiniestroId", res.body.id);
+  }
+}
+
+tests {
+  test("El siniestro nace en REPORTADO", function() {
+    expect(res.status).to.equal(201);
+    expect(res.body.estado).to.equal("REPORTADO");
+    expect(res.body.montoAprobado).to.be.null;
+  });
+
+  test("Devuelve el Location del recurso creado", function() {
+    expect(res.headers.location).to.match(/\/api\/siniestros\/[0-9a-f-]+/);
+  });
+}
+
+docs {
+  ## Flujo 1 · Reportar siniestro
+
+  Primer paso del flujo completo. El servicio persiste el siniestro en PostgreSQL y
+  publica `SiniestroReportado` en RabbitMQ de forma asíncrona.
+
+  Guarda el `siniestroId` para los pasos siguientes.
+}

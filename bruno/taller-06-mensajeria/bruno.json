@@ -1,0 +1,6 @@
+{
+  "version": "1",
+  "name": "taller-06-mensajeria",
+  "type": "collection",
+  "ignore": ["node_modules", ".git"]
+}
