@@ -60,8 +60,9 @@ class CotizacionControllerTest {
                                 "/cotizaciones/[0-9a-f-]+")))
                 .andExpect(jsonPath("$.clienteId")
                         .value("2f5e2d71-4ab1-4d08-8d3f-0b8329f8d3c8"))
-                .andExpect(jsonPath("$.estado").value("SOLICITADA"))
-                .andExpect(jsonPath("$.prima").doesNotExist());
+                .andExpect(jsonPath("$.estado").value("COTIZADA"))
+                .andExpect(jsonPath("$.prima.monto").exists())
+                .andExpect(jsonPath("$.prima.versionReglas").value("2026.2"));
     }
 
     @Test

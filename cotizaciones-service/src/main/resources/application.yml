@@ -28,6 +28,11 @@ eureka:
 clientes:
   base-url: ${CLIENTES_URL:http://clientes-service}
 
+suscripcion:
+  version: ${SUSCRIPCION_VERSION:2026.2}
+  tasa-base: ${SUSCRIPCION_TASA_BASE:0.035}
+  umbral-revision-manual: ${SUSCRIPCION_UMBRAL:70}
+
 management:
   endpoints:
     web:

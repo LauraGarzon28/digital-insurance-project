@@ -3,6 +3,7 @@ package com.cotizaciones_service.cotizacion.aplicacion;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.cotizaciones_service.compartido.ClienteNoEncontradoException;
@@ -20,15 +21,26 @@ public class CotizacionApplicationService implements CotizacionUseCase {
     private final EvaluacionRiesgoService evaluacionRiesgoService;
     private final RepositorioCotizaciones repositorioCotizaciones;
     private final ConsultaClientePort consultaCliente;
+    private final ReglasSuscripcion reglasVigentes;
 
     public CotizacionApplicationService(CotizacionFactory cotizacionFactory,
             EvaluacionRiesgoService evaluacionRiesgoService,
             RepositorioCotizaciones repositorioCotizaciones,
             ConsultaClientePort consultaCliente) {
+        this(cotizacionFactory, evaluacionRiesgoService, repositorioCotizaciones, consultaCliente,
+                new ReglasSuscripcion("2026.2", new BigDecimal("0.035"), 70));
+    }
+
+    public CotizacionApplicationService(CotizacionFactory cotizacionFactory,
+            EvaluacionRiesgoService evaluacionRiesgoService,
+            RepositorioCotizaciones repositorioCotizaciones,
+            ConsultaClientePort consultaCliente,
+            ReglasSuscripcion reglasVigentes) {
         this.cotizacionFactory = Objects.requireNonNull(cotizacionFactory);
         this.evaluacionRiesgoService = Objects.requireNonNull(evaluacionRiesgoService);
         this.repositorioCotizaciones = Objects.requireNonNull(repositorioCotizaciones);
         this.consultaCliente = Objects.requireNonNull(consultaCliente);
+        this.reglasVigentes = Objects.requireNonNull(reglasVigentes);
     }
 
     @Override
@@ -36,7 +48,9 @@ public class CotizacionApplicationService implements CotizacionUseCase {
         if (!consultaCliente.existe(clienteId)) {
             throw new ClienteNoEncontradoException(clienteId);
         }
-        return repositorioCotizaciones.guardar(cotizacionFactory.crear(clienteId, riesgo));
+        Cotizacion cotizacion = cotizacionFactory.crear(clienteId, riesgo);
+        cotizacion.registrarEvaluacion(evaluacionRiesgoService.evaluar(riesgo, reglasVigentes));
+        return repositorioCotizaciones.guardar(cotizacion);
     }
 
     @Override
