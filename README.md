@@ -98,16 +98,16 @@ Respuesta:
 
 ```json
 {
-  "token": "eyJhbGciOiJSUzI1NiIs...",
-  "tipo": "Bearer",
-  "expiraEn": 3600
+  "accessToken": "eyJhbGciOiJSUzI1NiIs...",
+  "tokenType": "Bearer",
+  "expiresIn": 3600
 }
 ```
 
 Guardar el token:
 
 ```bash
-TOKEN="pegar-el-token-aqui"
+TOKEN="pegar-el-accessToken-aqui"
 ```
 
 > El usuario `admin` lo siembra `AdminInicial` al arrancar `auth-service`.

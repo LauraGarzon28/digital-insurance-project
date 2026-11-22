@@ -2,6 +2,9 @@
 # Las llaves NO se versionan (están en .gitignore): cada quien genera las suyas.
 # Ejecutar una sola vez desde la raíz del repositorio:
 #   powershell -ExecutionPolicy Bypass -File scripts/generar-llaves.ps1
+#
+# Requiere openssl en el PATH. Git para Windows lo incluye en:
+#   C:\Program Files\Git\usr\bin\openssl.exe
 
 $ErrorActionPreference = "Stop"
 
@@ -14,24 +17,40 @@ if ((Test-Path $privada) -and (Test-Path $publica)) {
     exit 0
 }
 
+$openssl = Get-Command openssl -ErrorAction SilentlyContinue
+if (-not $openssl) {
+    $candidatos = @(
+        "C:\Program Files\Git\usr\bin\openssl.exe",
+        "C:\Program Files (x86)\Git\usr\bin\openssl.exe"
+    )
+    foreach ($c in $candidatos) {
+        if (Test-Path $c) { $openssl = $c; break }
+    }
+}
+
+if (-not $openssl) {
+    Write-Error "No se encontró openssl. Instala Git for Windows (incluye openssl) o agregalo al PATH."
+    exit 1
+}
+
+$rutaOpenSsl = if ($openssl -is [string]) { $openssl } else { $openssl.Source }
+
 New-Item -ItemType Directory -Force -Path $destino | Out-Null
 
 Write-Host "Generando par de llaves RSA 2048 en $destino ..."
 
-$rsa = [System.Security.Cryptography.RSA]::Create(2048)
-$privateBytes = $rsa.ExportRSAPrivateKey()
-$publicBytes = $rsa.ExportRSAPublicKey()
+# openssl escribe su progreso por stderr; se redirige para que PowerShell no lo
+# interprete como error nativo.
+$ErrorActionPreference = "Continue"
+& $rutaOpenSsl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out $privada 2>&1 | Out-Null
+& $rutaOpenSsl rsa -in $privada -pubout -out $publica 2>&1 | Out-Null
+$ErrorActionPreference = "Stop"
 
-function Convertir-A-Pem([byte[]]$bytes, [string]$etiqueta) {
-    $base64 = [Convert]::ToBase64String($bytes, [System.Base64FormattingOptions]::InsertLineBreaks)
-    return "-----BEGIN $etiqueta-----`n$base64`n-----END $etiqueta-----`n"
+if ((Test-Path $privada) -and (Test-Path $publica)) {
+    Write-Host "Listo:"
+    Write-Host "  $privada"
+    Write-Host "  $publica"
+} else {
+    Write-Error "No se pudieron generar las llaves."
+    exit 1
 }
-
-[System.IO.File]::WriteAllText($privada, (Convertir-A-Pem $privateBytes "PRIVATE KEY"))
-[System.IO.File]::WriteAllText($publica, (Convertir-A-Pem $publicBytes "PUBLIC KEY"))
-
-$rsa.Dispose()
-
-Write-Host "Listo:"
-Write-Host "  $privada"
-Write-Host "  $publica"
