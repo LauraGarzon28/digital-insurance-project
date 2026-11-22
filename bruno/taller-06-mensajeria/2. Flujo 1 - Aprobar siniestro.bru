@@ -1,0 +1,43 @@
+meta {
+  name: Flujo 1 - Aprobar siniestro
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/siniestros/{{flujo1SiniestroId}}/evaluacion
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "estadoPoliza": "ACTIVA",
+    "esFraude": false,
+    "montoPropuesto": 10000
+  }
+}
+
+tests {
+  test("El ajustador aprueba el siniestro", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.estado).to.equal("APROBADO");
+    expect(res.body.montoAprobado).to.equal(10000.00);
+  });
+
+  test("El monto aprobado se normaliza a dos decimales", function() {
+    expect(String(res.body.montoAprobado)).to.match(/^\d+\.\d{2}$/);
+  });
+}
+
+docs {
+  ## Flujo 1 · Aprobar
+
+  Pasa el siniestro a `APROBADO` y publica `SiniestroResuelto` con el monto.
+  Es el segundo hecho que debe llegar a la cola de auditoría.
+}

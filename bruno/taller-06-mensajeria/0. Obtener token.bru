@@ -1,0 +1,44 @@
+meta {
+  name: 0. Obtener token del auth-service
+  type: http
+  seq: 0
+}
+
+post {
+  url: {{baseUrl}}/api/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "usuario": "admin",
+    "password": "Admin12345"
+  }
+}
+
+script:post-response {
+  if (res.status === 200 && res.body.token) {
+    bru.setVar("token", res.body.token);
+  }
+}
+
+tests {
+  test("El auth-service entrega un JWT", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.token).to.be.a("string").and.not.be.empty;
+  });
+}
+
+docs {
+  ## 0 · Autenticación
+
+  Todos los servicios validan el JWT que emite `auth-service`. Ejecutar este paso
+  primero: guarda la variable `token` que usan los flujos 1 y 2.
+
+  El usuario administrador lo siembra `AdminInicial` al arrancar el servicio.
+}

@@ -1,0 +1,40 @@
+meta {
+  name: Flujo 2 - Auditoría del rechazo
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/auditoria/siniestros/{{flujo2SiniestroId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+tests {
+  test("La auditoría registró el reporte y el rechazo", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.length).to.equal(2);
+  });
+
+  test("El rechazo quedó auditado como RECHAZADO", function() {
+    const resuelto = res.body.find(evento => evento.tipo === "SiniestroResuelto");
+    expect(resuelto.estado).to.equal("RECHAZADO");
+  });
+
+  test("Cada evento tiene un mensajeId distinto (idempotencia)", function() {
+    const ids = res.body.map(evento => evento.mensajeId);
+    expect(new Set(ids).size).to.equal(ids.length);
+  });
+}
+
+docs {
+  ## Flujo 2 · Verificar la auditoría del rechazo
+
+  Demuestra dos cosas: que un rechazo también produce un hecho auditable y que
+  cada mensaje conserva su `mensajeId`, que es lo que permite descartar duplicados
+  sin auditar dos veces.
+}
