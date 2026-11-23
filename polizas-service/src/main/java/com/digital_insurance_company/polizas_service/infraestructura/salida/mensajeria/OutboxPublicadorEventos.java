@@ -1,12 +1,16 @@
 package com.digital_insurance_company.polizas_service.infraestructura.salida.mensajeria;
 
 import java.util.Map;
-import com.digital_insurance_company.polizas_service.dominio.puertos.PublicadorEventos;
+
 import org.springframework.stereotype.Component;
+
+import com.digital_insurance_company.polizas_service.dominio.puertos.PublicadorEventos;
+
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 @Component
-public class OutboxPublicadorEventos implements PublicadorEventos{
+public class OutboxPublicadorEventos implements PublicadorEventos {
 
     private final OutboxEventRepository repositorio;
     private final ObjectMapper objectMapper;
@@ -18,7 +22,11 @@ public class OutboxPublicadorEventos implements PublicadorEventos{
 
     @Override
     public void publicar(String topico, String clave, Map<String, Object> contenido) {
-        String payload = objectMapper.writeValueAsString(contenido);
-        repositorio.save(new OutboxEvent(topico, clave, payload));
+        try {
+            String payload = objectMapper.writeValueAsString(contenido);
+            repositorio.save(new OutboxEvent(topico, clave, payload));
+        } catch (JacksonException e) {
+            throw new IllegalStateException("Error al serializar el evento para el tópico " + topico, e);
+        }
     }
 }

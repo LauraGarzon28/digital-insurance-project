@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option java_package = "com.digital_insurance_company.polizasservice.grpc";
+option java_package = "com.digital_insurance_company.polizas_service.grpc";
 option java_multiple_files = true;
 
 // Contrato que polizas-service CONSUME. Lo diseña quien lo consume (Pólizas): pide solo lo
