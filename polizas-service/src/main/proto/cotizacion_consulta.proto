@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option java_package = "com.digital_insurance_company.polizasservice.grpc";
+option java_multiple_files = true;
+
+// Contrato que polizas-service CONSUME. Lo diseña quien lo consume (Pólizas): pide solo lo
+// que necesita para emitir, no el modelo interno de Cotización. cotizacion-service (Dev 1) debe
+// IMPLEMENTAR este servicio. Cada servicio conserva su propia COPIA de este archivo y genera
+// sus propias clases: ninguno depende del código del otro.
+service CotizacionConsulta {
+  rpc ObtenerParaEmision (ConsultaCotizacionRequest) returns (ConsultaCotizacionResponse) {}
+}
+
+message ConsultaCotizacionRequest {
+  string cotizacionId = 1;
+}
+
+message ConsultaCotizacionResponse {
+  bool   encontrada     = 1;  // false si la cotización no existe
+  string cotizacionId   = 2;
+  string clienteId      = 3;
+  string valorAsegurado = 4;  // decimal como texto
+  bool   aceptada       = 5;  // true solo si su estado es ACEPTADA
+}

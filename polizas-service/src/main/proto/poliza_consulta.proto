@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option java_package = "com.digital_insurance_company.polizasservice.grpc";
+option java_multiple_files = true;
+
+// Contrato que polizas-service EXPONE. Lo consume siniestros-service (Dev 3) para saber si una
+// póliza está vigente y cuál es su valor asegurado antes de evaluar un siniestro (HU-06/HU-08).
+service PolizaConsulta {
+  rpc ConsultarPoliza (ConsultaPolizaRequest) returns (ConsultaPolizaResponse) {}
+}
+
+message ConsultaPolizaRequest {
+  string polizaId = 1;
+}
+
+message ConsultaPolizaResponse {
+  bool   encontrada     = 1;  // false si la póliza no existe (en proto3 un bool false no se imprime)
+  string estado         = 2;  // VIGENTE | VENCIDA | EN_CANCELACION | CANCELADA
+  string valorAsegurado = 3;  // decimal como texto: nunca float para dinero
+  string fechaInicio    = 4;  // ISO-8601 (yyyy-MM-dd)
+  string fechaFin       = 5;
+  string clienteId      = 6;
+}
