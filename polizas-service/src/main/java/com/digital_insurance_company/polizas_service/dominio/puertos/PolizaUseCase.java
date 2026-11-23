@@ -11,7 +11,11 @@ public interface PolizaUseCase {
 
     Poliza renovarPoliza(UUID polizaId);
 
-    Poliza cancelarPoliza(UUID polizaId);
-
     Poliza consultarPoliza(UUID polizaId);
+
+    Poliza solicitarCancelacion(UUID polizaId);
+
+    Poliza confirmarCancelacion(UUID polizaId);
+
+    Poliza revertirCancelacion(UUID polizaId, String motivo);
 }

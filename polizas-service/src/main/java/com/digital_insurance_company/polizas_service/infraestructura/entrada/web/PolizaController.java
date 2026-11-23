@@ -42,6 +42,6 @@ public class PolizaController {
 
     @PostMapping("/{id}/cancelacion")
     public ResponseEntity<PolizaResponse> cancelar(@PathVariable UUID id) {
-        return ResponseEntity.ok(PolizaResponse.desde(casosDeUso.cancelarPoliza(id)));
+        return ResponseEntity.ok(PolizaResponse.desde(casosDeUso.solicitarCancelacion(id)));
     }
 }

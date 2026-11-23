@@ -1,7 +1,6 @@
 package com.digital_insurance_company.polizas_service.aplicacion;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -9,6 +8,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import com.digital_insurance_company.polizas_service.dominio.DatosCotizacionParaEmision;
@@ -18,6 +20,7 @@ import com.digital_insurance_company.polizas_service.dominio.PolizaFactory;
 import com.digital_insurance_company.polizas_service.dominio.PolizaNoEncontradaException;
 import com.digital_insurance_company.polizas_service.dominio.puertos.ConsultaCotizacionPort;
 import com.digital_insurance_company.polizas_service.dominio.puertos.PolizaRepository;
+import com.digital_insurance_company.polizas_service.dominio.puertos.PublicadorEventos;
 
 class PolizaApplicationServiceTest {
 private static final LocalDate INICIO = LocalDate.of(2026, 1, 1);
@@ -51,8 +54,11 @@ private static final LocalDate INICIO = LocalDate.of(2026, 1, 1);
 
     private final PolizaRepositoryFake repositorio = new PolizaRepositoryFake();
     private final ConsultaCotizacionFake consultaCotizacion = new ConsultaCotizacionFake();
+        private final PublicadorEventos publicadorEventos = (PublicadorEventos) Proxy.newProxyInstance(
+            PublicadorEventos.class.getClassLoader(), new Class<?>[] { PublicadorEventos.class },
+            (proxy, method, args) -> null);
     private final PolizaApplicationService casosDeUso =
-            new PolizaApplicationService(repositorio, consultaCotizacion, new PolizaFactory());
+            new PolizaApplicationService(repositorio, consultaCotizacion, publicadorEventos, new PolizaFactory());
 
     @Test
     void emitirGuardaLaPolizaEnElRepositorio() {

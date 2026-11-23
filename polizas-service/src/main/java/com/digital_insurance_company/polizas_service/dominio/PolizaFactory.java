@@ -17,6 +17,7 @@ public class PolizaFactory {
                 cotizacionId,
                 new ValorAsegurado(valorAsegurado),
                 new VigenciaPoliza(fechaInicio, fechaFin),
+                false,
                 false);
     }
 
@@ -33,6 +34,7 @@ public class PolizaFactory {
                 Objects.requireNonNull(cotizacionId, "cotizacionId es obligatorio"),
                 new ValorAsegurado(valorAsegurado),
                 new VigenciaPoliza(fechaInicio, fechaFin),
-                cancelada);
+                cancelada,
+                false);
     }
 }
