@@ -56,7 +56,7 @@ los nombres de los servicios, y la validación del token se hace en un solo punt
 - *Eureka*: sin descubrimiento, cada servicio tendría las URLs de los demás fijas y un
   cambio de puerto rompería el sistema entero.
 - *Hexagonal en cada contexto*: permite probar las reglas de negocio sin Spring ni base de
-  datos. Es lo que hace posible 160 pruebas rápidas.
+  datos. Es lo que hace posible 109 pruebas unitarias y web rápidas (114 en total).
 - *Circuit Breaker en Cotizaciones*: sin él, un `clientes-service` lento agota los hilos de
   Cotizaciones y tumba la cotización completa. Resuelve el atributo 3.
 - *Mensajería asíncrona hacia Auditoría*: resuelve que la trazabilidad **no** puede costar
@@ -140,9 +140,9 @@ negativas.
 | ADR | Decisión | Estado | Alternativa descartada | Consecuencia negativa aceptada |
 |---|---|---|---|---|
 | **P-01** | Siniestros consulta la póliza vía puerto, no confía en el cliente | **Aceptado — implementado** | Seguir recibiendo el estado en el request | Una llamada más en el camino crítico y un modo de fallo nuevo |
-| **P-02** | Extraer solo `siniestros-service` como fase 1 | **Aceptado** — fase 1 implementada (ver P-07) | Extraer los tres contextos a la vez | Consistencia eventual, una base y un despliegue más |
-| **P-03** | Puertos y adaptadores entre contextos | Aceptado | Importar el caso de uso de Cotización directamente | Una interfaz y una traducción por cada comunicación |
-| **P-04** | Monolito modular antes que microservicios | Aceptado (superado por P-07 en Siniestros) | Distribuir todo desde el inicio | Un cambio obliga a redesplegar todo; no se escala solo reclamos |
+| **P-02** | Extraer solo `siniestros-service` como fase 1 | **Aceptado** — fase 1 implementada en P-07 y luego completada con los demás servicios | Extraer los tres contextos a la vez desde el inicio | Consistencia eventual, más bases y despliegues |
+| **P-03** | Puertos y adaptadores entre contextos | **Aceptado — implementado** | Importar el caso de uso de Cotización directamente | Una interfaz y una traducción por cada comunicación |
+| **P-04** | Monolito modular antes que microservicios | **Superado** (por P-07 y la extracción posterior de los servicios) | Distribuir todo desde el inicio | En su momento, un cambio obligaba a redesplegar todo |
 | **P-05** | CQRS para el histórico de siniestros | **Propuesta** — no implementado | Consultar los dos contextos en cada request | Consistencia eventual y un modelo más que mantener |
 | **P-06** | RabbitMQ para la auditoría asíncrona | **Aceptado** — implementado | Auditoría por llamada REST síncrona | Un bróker más que operar y consistencia eventual visible |
 | **P-07** | Extraer Siniestros a servicio propio | **Aceptado** — implementado | Mantener los tres contextos en un proceso | Una base, un despliegue y un puerto más; llamadas entre contextos por red |
@@ -186,12 +186,13 @@ compañía. Ninguna de las dos condiciones se cumple.
 
 | # | Riesgo o deuda | Impacto | Qué se haría si se materializa |
 |---|---|---|---|
-| **1** | **Pólizas/Cotizaciones/Siniestros dependen de la disponibilidad de sus consultas HTTP síncronas.** | Un servicio no disponible puede impedir emitir o evaluar un siniestro | Propagar errores explícitamente y añadir timeout/circuit breaker si las métricas lo justifican |
+| **1** | **Pólizas/Cotizaciones/Siniestros dependen de la disponibilidad de sus consultas HTTP síncronas.** | Un servicio no disponible puede impedir emitir o evaluar un siniestro | Propagar errores explícitamente y añadir timeout/circuit breaker si las métricas lo justifican (hoy solo `cotizaciones → clientes` tiene Circuit Breaker) |
 | **2** | ~~Pólizas en H2 en memoria~~ | **Cerrado**: `polizas-service` usa PostgreSQL `polizas_db` y Flyway |
-| **3** | **El código de `digital-insurance-api` sigue duplicado en el repositorio.** | Confusión sobre cuál servicio es fuente de verdad | Retirar la carpeta heredada después de validar los flujos por Gateway |
+| **3** | ~~Código de `digital-insurance-api` duplicado~~ | **Cerrado**: la carpeta heredada ya fue retirada del repositorio |
 | **4** | **El contrato de `EventoSiniestro` está duplicado** en productor y consumidor. | Un cambio incompatible rompe la auditoría sin fallar en compilación | Extraer un módulo compartido o publicar un esquema versionado |
-| **5** | **No hay pruebas de arquitectura.** | El hexágono puede erosionarse sin que el build lo note | F1 y F3 con ArchUnit |
+| **5** | **No hay pruebas de arquitectura con ArchUnit (F1).** | El hexágono interno puede erosionarse sin que el build lo note | Añadir pruebas ArchUnit para verificar F1 en cada servicio |
 | **6** | ~~La ruta de Pólizas apunta al monolito~~ | **Cerrado**: Gateway usa `lb://polizas-service` y el servicio se registra en Eureka |
+| **7** | **Saga de cancelación incompleta y ausencia de Outbox en Siniestros / DLQ en Auditoría.** | Una cancelación de póliza queda en `EN_CANCELACION` sin respuesta de Siniestros, y un fallo de RabbitMQ tras guardar en Siniestros no reintenta | Implementar consumidor/publicador de cancelación y tabla Outbox en `siniestros-service`, y declarar DLQ en `auditoria-service` |
 
 ##### Deudas cerradas en este corte
 
@@ -199,9 +200,7 @@ Las siguientes estaban registradas y ya no aplican:
 
 - ~~No hay auditoría persistente~~ → **cerrada** con `auditoria-service` y RabbitMQ (P-06).
 - ~~Los datos de Siniestros se pierden al reiniciar~~ → **cerrada** con `siniestros_db` (P-07).
-- ~~Un solo proceso para tres capacidades~~ → **cerrada en ejecución**: Clientes, Cotizaciones,
-  Pólizas y Siniestros tienen servicios independientes; el monolito permanece solo como código
-  heredado pendiente de retirar.
+- ~~Un solo proceso para tres capacidades~~ → **cerrada**: Clientes, Cotizaciones, Pólizas y Siniestros son servicios independientes y `digital-insurance-api/` fue retirado.
 
 ---
 

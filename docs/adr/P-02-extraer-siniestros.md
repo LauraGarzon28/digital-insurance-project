@@ -1,6 +1,6 @@
 # P-02. Extraer solo `siniestros-service` como fase 1
 
-Estado: **Aceptado** — fase 1 implementada en el ADR P-07
+Estado: **Aceptado (fase 1 ejecutada en P-07; ampliado posteriormente a todos los servicios)**
 
 ## Contexto
 
@@ -35,8 +35,8 @@ la siguiente.
 evaluada en la matriz de decisión. Se descarta para Siniestros —no para los otros dos— por
 el problema concreto del control del dato (ADR P-01) y por la asimetría de carga.
 
-**Extraer un servicio por entidad.** Se descarta por granularidad: `Paciente`, `Cama`,
-`Orden`, `Resultado` no tienen ciclos de vida independientes. Sería un error de diseño, no
+**Extraer un servicio por entidad o Value Object.** Se descarta por granularidad: `Riesgo`, `Prima`,
+`ValorAsegurado`, `VigenciaPoliza` no tienen ciclos de vida independientes. Sería un error de diseño, no
 una mejora.
 
 ## Consecuencias

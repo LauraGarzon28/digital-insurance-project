@@ -238,14 +238,16 @@ cd siniestros-service && ./mvnw test
 
 | Servicio | Pruebas |
 |---|---:|
-| `cotizaciones-service` | 33 |
-| `polizas-service` | — |
-| `siniestros-service` | 30 |
-| `auth-service` | 1 |
-| `clientes-service` | 4 |
+| `cotizaciones-service` | 36 (35 sin `*ApplicationTests`) |
+| `polizas-service` | 24 (23 sin `*ApplicationTests`) |
+| `siniestros-service` | 35 |
+| `auth-service` | 2 (1 sin `*ApplicationTests`) |
+| `clientes-service` | 5 (4 sin `*ApplicationTests`) |
 | `auditoria-service` | 4 |
-| `discovery-server` | 3 |
-| `gateway` | 3 |
+| `discovery-server` | 4 (3 sin `*ApplicationTests`) |
+| `gateway` | 4 |
+
+En total son **114 pruebas** (**109** al ejecutar con `-Dtest=!*ApplicationTests`).
 
 Correr todas de una vez (PowerShell):
 
@@ -287,8 +289,7 @@ Cada servicio de dominio sigue **arquitectura hexagonal**:
 Las dependencias apuntan **hacia adentro**: el dominio no conoce Spring, ni JPA, ni RabbitMQ.
 
 Detalle completo, diagramas C4 y decisiones en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md).
-`digital-insurance-api/` ya no forma parte del arranque ni del enrutamiento; tras verificar
-el flujo de esta guía, queda como código legado que puede retirarse.
+El antiguo monolito legado (`digital-insurance-api/`) ya fue retirado del repositorio tras la extracción a microservicios independientes.
 
 ---
 

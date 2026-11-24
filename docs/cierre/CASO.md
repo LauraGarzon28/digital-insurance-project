@@ -42,9 +42,9 @@ infraestructura**, manteniendo la escala necesaria.
 
 **Lo que sí se toma del caso:** la pregunta de diseño correcta no es *«¿microservicios sí o
 no?»* sino *«¿qué problema concreto resuelve separar esta parte, y cuánto cuesta la
-separación?»*. Aplicado a este proyecto: extraer **solo** Siniestros (ADR P-02) porque ahí hay
-un problema concreto —el control del dato y la asimetría de carga—, y no extraer Cotización ni
-Pólizas porque no lo hay.
+separación?»*. Aplicado inicialmente en fase 1 (ADR P-02 y P-07), la extracción empezó por
+Siniestros —donde se concentraban el control del dato y la asimetría de carga— antes de
+completar la separación actual de los servicios por subdominio y despliegue independiente.
 
 **Lo que no se puede tomar:** el −90 % no es un resultado propio ni transferible. Es el
 resultado de Prime Video en su contexto, y presentarlo como propio sería una falta de
@@ -52,13 +52,13 @@ honestidad académica.
 
 ## Cómo se usaría en la defensa
 
-Si preguntan *«¿por qué no extrajeron los tres servicios?»*:
+Si preguntan *«¿por qué primero se evaluó extraer solo Siniestros antes de distribuir todo?»*:
 
 > «Porque el caso de Prime Video de 2023 muestra que distribuir tiene un costo que hay que
-> medir. En nuestro dominio, el problema concreto está en Siniestros: la evaluación confía en
-> datos que envía el cliente y su carga no crece igual que la cotización. Ahí sí justifica
-> separar. En Cotización y Pólizas no hay un problema equivalente, y separarlas aportaría
-> consistencia eventual y operación sin beneficio.»
+> medir. En nuestro dominio, el riesgo más crítico estaba en Siniestros: la evaluación
+> necesitaba verificar el contrato real en Pólizas y su carga no crece igual que la
+> cotización. Empezar por ahí permitió validar el patrón (P-02/P-07) sin caer en un monolito
+> distribuido antes de separar los demás servicios.»
 
 ## Fuente y nota de verificación
 

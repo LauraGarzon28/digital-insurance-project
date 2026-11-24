@@ -1,6 +1,6 @@
 # P-04. Monolito modular antes que microservicios
 
-Estado: **Aceptado** — implementado
+Estado: **Superado** — decisión inicial reemplazada por P-07 y la extracción posterior a microservicios con PostgreSQL
 
 ## Contexto
 
@@ -29,8 +29,8 @@ exige contratos versionados, pruebas de integración y operación. Además las f
 dominio todavía podían ajustarse sin costo, y en un sistema distribuido mover una frontera
 cuesta mucho más.
 
-**Un servicio por entidad.** Se descarta por granularidad: sería un error de diseño.
-`Paciente`, `Cama`, `Orden` y `Resultado` no tienen ciclos de vida independientes.
+**Un servicio por entidad o Value Object.** Se descarta por granularidad: sería un error de diseño.
+`Riesgo`, `Prima`, `ValorAsegurado` y `VigenciaPoliza` no tienen ciclos de vida independientes.
 
 **Un monolito sin módulos internos.** Se descarta porque pierde la ventaja principal: con
 paquetes por contexto y puertos explícitos, una extracción posterior es mecánica, no una

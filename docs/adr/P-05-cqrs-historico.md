@@ -59,5 +59,7 @@ corrompen con eventos duplicados.
 (−) **La reconstrucción depende de la retención de los eventos.** Si se borran, no se puede
 reproducir.
 
-(−) **Depende de tener mensajería**, que hoy no existe en el proyecto. Es la razón por la que
-este ADR queda en estado Propuesta y no se puede implementar sin resolver antes el ADR P-02.
+(−) **Requiere mantener un proyector y su modelo de lectura sincronizados.** Aunque la
+mensajería asíncrona con RabbitMQ ya está implementada para auditoría (ADR P-06), este ADR
+queda en estado Propuesta porque el modelo de lectura desnormalizado para HU-10 aún no se ha
+construido.

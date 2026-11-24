@@ -121,17 +121,18 @@ Informe de verificación con huella: 02bac949a10d
 
 ---
 
-## Lo que queda pendiente en el código (no resta puntos)
+## Estado del código tras las actualizaciones finales
 
-Registrado en `docs/ARQUITECTURA.md` §7 como deuda conocida:
+Registrado en `docs/ARQUITECTURA.md` §7:
 
-| Deuda | Estado |
+| Elemento | Estado actual |
 |---|---|
-| La evaluación recibe `estadoPoliza` del cliente (riesgo R1) | **P-01 — propuesta**, no implementado |
-| Pólizas sigue en H2 en memoria | Deuda aceptada para el alcance del curso |
-| `cliente` y `cotizacion` duplicados entre el monolito y sus servicios | Deuda de migración |
-| El contrato de `EventoSiniestro` está duplicado en productor y consumidor | Deuda registrada |
-| Faltan pruebas de arquitectura (ArchUnit) | F1 y F3 propuestas; F2 se cumple por separación de proyectos |
+| Consulta de póliza desde Siniestros (riesgo R1) | **Cerrado — ADR P-01 implementado** (`PolizasRestAdapter`) |
+| Persistencia de Pólizas y demás contextos | **Cerrado** — 6 bases PostgreSQL propias con Flyway |
+| Monolito legado (`digital-insurance-api/`) | **Cerrado** — retirado del repositorio |
+| Contrato de `EventoSiniestro` duplicado en productor y consumidor | Deuda registrada |
+| Pruebas de arquitectura (ArchUnit) | F1 propuesta; F2 por separación Maven y F3–F5 implementadas |
+| Saga de cancelación / Outbox en Siniestros / DLQ en Auditoría | Pendiente como mejora posterior |
 
-Todas están marcadas como **propuesta** en la documentación, que es lo que pide el criterio
-M5: no presentar como hecho lo que no está construido.
+Lo no implementado sigue marcado explícitamente como **propuesta** o **deuda** en la
+documentación (criterio M5: no presentar como hecho lo que no está construido).
