@@ -1,0 +1,18 @@
+meta {
+  name: 5. Cancelar poliza
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/polizas/{{polizaId}}/cancelacion
+}
+
+tests {
+  test("status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  test("estado CANCELADA", function() {
+    expect(res.body.estado).to.equal("CANCELADA");
+  });
+}

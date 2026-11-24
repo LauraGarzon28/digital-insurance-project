@@ -1,0 +1,27 @@
+meta {
+  name: 1. Sembrar cotizacion aceptada
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/test/cotizaciones-aceptadas
+  body: json
+}
+
+body:json {
+  {
+    "valorAsegurado": 80000000,
+    "aceptada": true
+  }
+}
+
+tests {
+  test("status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+script:post-response {
+  bru.setVar("cotizacionId", res.body.cotizacionId);
+}

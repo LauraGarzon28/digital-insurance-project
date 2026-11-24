@@ -44,15 +44,15 @@ contextos delimitados del sistema.
 | `auth-service` | Servicio de identidad, JWT RS256 | PostgreSQL `auth_db` | HTTP; servicio de validación del resto | Seguridad (5) |
 | `clientes-service` | Hexagonal + DDD | PostgreSQL `clientes_db` | HTTP; servicio de consulta de Cotizaciones | Modificabilidad (4) |
 | `cotizaciones-service` | Hexagonal + DDD + Circuit Breaker | PostgreSQL `cotizaciones_db` | HTTP síncrona a `clientes-service` | Disponibilidad (3) |
-| `siniestros-service` | Hexagonal + DDD + **publicador de eventos** | PostgreSQL `siniestros_db` | REST entrante; **asíncrona saliente** a RabbitMQ | Control del dato (1) |
+| `polizas-service` | Hexagonal + DDD | PostgreSQL `polizas_db` | HTTP síncrona a Cotizaciones; consulta desde Siniestros | Control del dato (1) |
+| `siniestros-service` | Hexagonal + DDD + **publicador de eventos** | PostgreSQL `siniestros_db` | REST entrante; HTTP síncrona a Pólizas; **asíncrona saliente** a RabbitMQ | Control del dato (1) |
 | `auditoria-service` | **Consumidor idempotente** (event-driven) | PostgreSQL `auditoria_db` | **Asíncrona entrante** desde RabbitMQ | Auditabilidad (2) |
-| `digital-insurance-api` | Hexagonal + DDD (monolito modular heredado) | H2 en memoria (**deuda**) | REST | Modificabilidad (4) |
 | RabbitMQ | Message broker (topic exchange) | — | AMQP 0-9-1 | Auditabilidad (2) |
 
 **Prueba de necesidad, fila por fila:**
 
 - *API Gateway*: resuelve un problema concreto — el cliente no debe conocer los puertos ni
-  los nombres de ocho servicios, y la validación del token se hace en un solo punto.
+los nombres de los servicios, y la validación del token se hace en un solo punto.
 - *Eureka*: sin descubrimiento, cada servicio tendría las URLs de los demás fijas y un
   cambio de puerto rompería el sistema entero.
 - *Hexagonal en cada contexto*: permite probar las reglas de negocio sin Spring ni base de
@@ -86,22 +86,26 @@ flowchart TB
     GW -->|lb:// SÍNCRONA| COT[cotizaciones-service :8083]
     GW -->|lb:// SÍNCRONA| SIN[siniestros-service :8084]
     GW -->|lb:// SÍNCRONA| AUD[auditoria-service :8085]
-    GW -->|HTTP SÍNCRONA| MONO[digital-insurance-api :8090]
+    GW -->|lb:// SÍNCRONA| POL[polizas-service :8086]
 
     AUTH -.->|se registran| EUR[discovery-server :8761]
     CLI -.->|se registran| EUR
     COT -.->|se registran| EUR
+    POL -.->|se registra| EUR
     SIN -.->|se registran| EUR
     AUD -.->|se registran| EUR
     GW -.->|consulta registro| EUR
 
     COT -->|HTTP SÍNCRONA<br/>Circuit Breaker| CLI
+    POL -->|HTTP SÍNCRONA| COT
+    SIN -->|HTTP SÍNCRONA| POL
     SIN -->|AMQP ASÍNCRONA<br/>SiniestroReportado / SiniestroResuelto| MQ[(rabbitmq :5672)]
     MQ -->|AMQP ASÍNCRONA| AUD
 
     AUTH --- DB1[(auth_db)]
     CLI --- DB2[(clientes_db)]
     COT --- DB3[(cotizaciones_db)]
+    POL --- DB6[(polizas_db)]
     SIN --- DB4[(siniestros_db)]
     AUD --- DB5[(auditoria_db)]
 
@@ -116,13 +120,15 @@ flowchart TB
 | Gateway → cada servicio | **Síncrona** | Es un proxy de entrada: reenvía y devuelve la respuesta |
 | Gateway → `auth-service` (jwks) | **Síncrona** | La clave pública se necesita para validar el token antes de dejar pasar la petición |
 | Cotizaciones → Clientes | **Síncrona** | Se necesita saber *ya* si el cliente existe para no crear una cotización huérfana; protegida con Circuit Breaker y timeout |
+| Pólizas → Cotizaciones | **Síncrona** | Solo se emite sobre una cotización aceptada; el servicio valida el dato en la fuente de verdad |
+| Siniestros → Pólizas | **Síncrona** | El valor asegurado y el estado de la póliza vienen del registro, no del request del cliente |
 | **Siniestros → Auditoría** | **Asíncrona** | Es propagación de un hecho, no una consulta: la decisión del ajustador no debe esperar a que se escriba la auditoría, ni fallar si la auditoría está caída |
 | Servicios → Eureka | Síncrona (heartbeat) | Es registro y descubrimiento, no lógica de negocio |
 
-**Cadenas síncronas:** la más larga es Actor → Gateway → Cotizaciones → Clientes: **tres
-saltos** en el peor caso. Está acotada con `CircuitBreaker`, `connectTimeout` de 2 s y
-`readTimeout` de 3 s, así que un fallo de Clientes no se propaga como espera indefinida.
-No hay ninguna otra cadena de tres saltos.
+**Cadenas síncronas:** Actor → Gateway → Cotizaciones → Clientes y Actor → Gateway →
+Siniestros → Pólizas son cadenas de **tres saltos**. Cotizaciones → Clientes está acotada con
+`CircuitBreaker`, `connectTimeout` de 2 s y `readTimeout` de 3 s. Las llamadas nuevas a
+Pólizas usan Eureka y propagan el JWT del request.
 
 ---
 
@@ -133,7 +139,7 @@ negativas.
 
 | ADR | Decisión | Estado | Alternativa descartada | Consecuencia negativa aceptada |
 |---|---|---|---|---|
-| **P-01** | Siniestros consulta la póliza vía puerto, no confía en el cliente | **Propuesta** | Seguir recibiendo el estado en el request | Una llamada más en el camino crítico y un modo de fallo nuevo |
+| **P-01** | Siniestros consulta la póliza vía puerto, no confía en el cliente | **Aceptado — implementado** | Seguir recibiendo el estado en el request | Una llamada más en el camino crítico y un modo de fallo nuevo |
 | **P-02** | Extraer solo `siniestros-service` como fase 1 | **Aceptado** — fase 1 implementada (ver P-07) | Extraer los tres contextos a la vez | Consistencia eventual, una base y un despliegue más |
 | **P-03** | Puertos y adaptadores entre contextos | Aceptado | Importar el caso de uso de Cotización directamente | Una interfaz y una traducción por cada comunicación |
 | **P-04** | Monolito modular antes que microservicios | Aceptado (superado por P-07 en Siniestros) | Distribuir todo desde el inicio | Un cambio obliga a redesplegar todo; no se escala solo reclamos |
@@ -149,9 +155,9 @@ negativas.
 |---|---|---|---|---|
 | **F1** | El dominio no depende de la infraestructura | El hexágono de cada contexto | ArchUnit | Propuesta |
 | **F2** | Ningún contexto importa la infraestructura de otro | Las fronteras entre contextos (ADR P-03) | Compilación Maven + ArchUnit | **Cumplida por construcción** en los servicios extraídos: son proyectos separados y un import cruzado no compila |
-| **F3** | La evaluación de un siniestro no acepta el estado de póliza del cliente | El riesgo R1 del ATAM (ADR P-01) | Prueba de firma / ArchUnit | Propuesta |
+| **F3** | La evaluación de un siniestro no acepta el estado ni el valor asegurado del cliente | El riesgo R1 del ATAM (ADR P-01) | Pruebas de aplicación y controlador | **Implementada** |
 | **F4** | El consumidor de auditoría es idempotente | Que un reenvío no duplique el histórico | Prueba con el mismo `mensajeId` dos veces | **Implementada**: `AuditoriaServiceTest.elMismoMensajeDosVecesSoloSeAuditaUnaVez` |
-| **F5** | El gateway no enruta Siniestros al monolito | Que la extracción no se revierta por accidente | Prueba sobre `RouteLocator` | **Implementada**: `RutasGatewayTest.siniestrosYaNoSeEnrutaAlMonolito` |
+| **F5** | El gateway enruta Pólizas por Eureka | Que el gateway no dependa de un puerto fijo o del monolito | Prueba sobre `RouteLocator` | **Implementada**: `RutasGatewayTest.polizasSeEnrutaAlServicioDescubiertoPorEureka` |
 
 Las pruebas F4 y F5 corren en cada `mvnw test`, así que la regla se verifica sola.
 
@@ -180,12 +186,12 @@ compañía. Ninguna de las dos condiciones se cumple.
 
 | # | Riesgo o deuda | Impacto | Qué se haría si se materializa |
 |---|---|---|---|
-| **1** | **La evaluación confía en el dato del cliente.** `EvaluacionSiniestroService.evaluar()` recibe `estadoPoliza` como parámetro. | Se podría aprobar un reclamo sobre una póliza cancelada: riesgo de negocio y de control interno | Implementar P-01: puerto `ConsultaPolizaPort` + adaptador REST con timeout y circuit breaker |
-| **2** | **Pólizas en H2 en memoria.** `digital-insurance-api` aún no tiene persistencia real. | Las pólizas se pierden al reiniciar; no hay operación real posible | Migrar el contexto de Pólizas a PostgreSQL, siguiendo el patrón ya aplicado en Siniestros (P-07) |
-| **3** | **Duplicación de `cliente` y `cotizacion`** entre el monolito y sus servicios extraídos. | Dos fuentes de verdad mientras convivan | Retirar esos paquetes del monolito cuando la ruta de Pólizas al servicio de Cotizaciones esté resuelta |
+| **1** | **Pólizas/Cotizaciones/Siniestros dependen de la disponibilidad de sus consultas HTTP síncronas.** | Un servicio no disponible puede impedir emitir o evaluar un siniestro | Propagar errores explícitamente y añadir timeout/circuit breaker si las métricas lo justifican |
+| **2** | ~~Pólizas en H2 en memoria~~ | **Cerrado**: `polizas-service` usa PostgreSQL `polizas_db` y Flyway |
+| **3** | **El código de `digital-insurance-api` sigue duplicado en el repositorio.** | Confusión sobre cuál servicio es fuente de verdad | Retirar la carpeta heredada después de validar los flujos por Gateway |
 | **4** | **El contrato de `EventoSiniestro` está duplicado** en productor y consumidor. | Un cambio incompatible rompe la auditoría sin fallar en compilación | Extraer un módulo compartido o publicar un esquema versionado |
 | **5** | **No hay pruebas de arquitectura.** | El hexágono puede erosionarse sin que el build lo note | F1 y F3 con ArchUnit |
-| **6** | **El monolito conserva `/api/polizas`**, enrutado por el gateway a un puerto fijo en lugar de Eureka. | `digital-insurance-api` no se descubre por nombre lógico | Registrarlo en Eureka y cambiar la ruta a `lb://` (lo hará el equipo al extraer Pólizas) |
+| **6** | ~~La ruta de Pólizas apunta al monolito~~ | **Cerrado**: Gateway usa `lb://polizas-service` y el servicio se registra en Eureka |
 
 ##### Deudas cerradas en este corte
 
@@ -193,8 +199,9 @@ Las siguientes estaban registradas y ya no aplican:
 
 - ~~No hay auditoría persistente~~ → **cerrada** con `auditoria-service` y RabbitMQ (P-06).
 - ~~Los datos de Siniestros se pierden al reiniciar~~ → **cerrada** con `siniestros_db` (P-07).
-- ~~Un solo proceso para tres capacidades~~ → **parcialmente cerrada**: Siniestros ya es
-  independiente; Pólizas y Cotización siguen en el monolito.
+- ~~Un solo proceso para tres capacidades~~ → **cerrada en ejecución**: Clientes, Cotizaciones,
+  Pólizas y Siniestros tienen servicios independientes; el monolito permanece solo como código
+  heredado pendiente de retirar.
 
 ---
 

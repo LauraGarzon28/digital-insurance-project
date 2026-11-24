@@ -84,6 +84,23 @@ services:
       timeout: 3s
       retries: 10
 
+  polizas-db:
+    image: postgres:17-alpine
+    container_name: polizas-db
+    environment:
+      POSTGRES_DB: polizas_db
+      POSTGRES_USER: polizas_user
+      POSTGRES_PASSWORD: ${POLIZAS_DB_PASSWORD:-polizas_pass}
+    ports:
+      - "5438:5432"
+    volumes:
+      - polizas_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U polizas_user -d polizas_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   rabbitmq:
     image: rabbitmq:4-management-alpine
     container_name: insurance-rabbitmq
@@ -105,3 +122,4 @@ volumes:
   cotizaciones_data:
   siniestros_data:
   auditoria_data:
+  polizas_data:

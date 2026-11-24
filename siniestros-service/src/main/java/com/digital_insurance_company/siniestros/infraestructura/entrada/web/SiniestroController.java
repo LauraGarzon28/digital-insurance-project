@@ -31,8 +31,7 @@ public class SiniestroController {
     public ResponseEntity<SiniestroResponse> reportar(@RequestBody SiniestroRequest request) {
         Siniestro siniestro = siniestroUseCase.reportarSiniestro(
                 request.polizaId(),
-                request.descripcion(),
-                request.valorAseguradoPoliza());
+                request.descripcion());
 
         return ResponseEntity
                 .created(URI.create("/api/siniestros/" + siniestro.getId()))
@@ -50,7 +49,6 @@ public class SiniestroController {
             @RequestBody EvaluarSiniestroRequest request) {
         Siniestro siniestro = siniestroUseCase.evaluarSiniestro(
                 id,
-                request.estadoPoliza(),
                 request.esFraude(),
                 request.montoPropuesto());
         return ResponseEntity.ok(SiniestroResponse.desde(siniestro));

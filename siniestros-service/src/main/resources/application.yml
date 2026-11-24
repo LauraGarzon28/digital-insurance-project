@@ -38,6 +38,9 @@ eventos:
   cola-auditoria: auditoria.siniestros.queue
   routing-key: siniestro.decision
 
+polizas:
+  base-url: ${POLIZAS_URL:http://polizas-service}
+
 management:
   endpoints:
     web:

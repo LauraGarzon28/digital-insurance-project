@@ -32,7 +32,7 @@ Todos los comandos se ejecutan **desde la raíz del repositorio**.
 docker compose up -d
 ```
 
-Levanta cinco PostgreSQL y RabbitMQ:
+Levanta seis PostgreSQL y RabbitMQ:
 
 | Contenedor | Puerto host | Base de datos |
 |---|---|---|
@@ -41,6 +41,7 @@ Levanta cinco PostgreSQL y RabbitMQ:
 | `cotizaciones-db` | 5435 | `cotizaciones_db` |
 | `siniestros-db` | 5436 | `siniestros_db` |
 | `auditoria-db` | 5437 | `auditoria_db` |
+| `polizas-db` | 5438 | `polizas_db` |
 | `insurance-rabbitmq` | 5672 · 15672 (consola) | — |
 
 Esperar a que todos reporten `healthy`: `docker compose ps`.
@@ -60,18 +61,18 @@ Crea `keys/private.pem` y `keys/public.pem`. Si ya existen, el script no las sob
 
 ### 2.3 Arrancar los servicios
 
-**El orden importa**: primero el descubrimiento, después autenticación, y al final el gateway
-(que necesita a los demás registrados en Eureka).
+**El orden importa**: primero Eureka y autenticación; luego los servicios de negocio en el
+orden Cotizaciones → Pólizas → Siniestros. Arranca el gateway al final.
 
 | Orden | Servicio | Puerto | Comando |
 |---:|---|---:|---|
 | 1 | `discovery-server` | 8761 | `cd discovery-server` → `./mvnw spring-boot:run` |
 | 2 | `auth-service` | 8081 | `cd auth-service` → `./mvnw spring-boot:run` |
-| 3 | `siniestros-service` | 8084 | `cd siniestros-service` → `./mvnw spring-boot:run` |
-| 4 | `auditoria-service` | 8085 | `cd auditoria-service` → `./mvnw spring-boot:run` |
-| 5 | `cotizaciones-service` | 8083 | `cd cotizaciones-service` → `./mvnw spring-boot:run` |
-| 6 | `clientes-service` | 8082 | `cd clientes-service` → `./mvnw spring-boot:run` |
-| 7 | `digital-insurance-api` | 8090 | `cd digital-insurance-api` → `./mvnw spring-boot:run` |
+| 3 | `clientes-service` | 8082 | `cd clientes-service` → `./mvnw spring-boot:run` |
+| 4 | `cotizaciones-service` | 8083 | `cd cotizaciones-service` → `./mvnw spring-boot:run` |
+| 5 | `polizas-service` | 8086 | `cd polizas-service` → `./mvnw spring-boot:run` |
+| 6 | `siniestros-service` | 8084 | `cd siniestros-service` → `./mvnw spring-boot:run` |
+| 7 | `auditoria-service` | 8085 | `cd auditoria-service` → `./mvnw spring-boot:run` |
 | 8 | `gateway` | 8080 | `cd gateway` → `./mvnw spring-boot:run` |
 
 En Windows usar `.\mvnw.cmd` en lugar de `./mvnw`.
@@ -81,7 +82,7 @@ Consola de RabbitMQ: <http://localhost:15672> (`guest` / `guest`).
 
 ---
 
-## 3. Petición que cruza dos servicios
+## 3. Flujo completo: cliente, cotización, póliza y siniestro
 
 Este es el flujo que demuestra la integración completa. Usa el **API Gateway** como única
 puerta de entrada.
@@ -112,53 +113,76 @@ TOKEN="pegar-el-accessToken-aqui"
 
 > El usuario `admin` lo siembra `AdminInicial` al arrancar `auth-service`.
 
-### 3.2 Reportar un siniestro
+### 3.2 Crear un cliente y una cotización
+
+```bash
+curl -X POST http://localhost:8080/api/clientes \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"nombreCompleto":"Laura Ejemplo","tipoDocumento":"CC","numeroDocumento":"123456789","correo":"laura@example.com","telefono":"3001234567"}'
+```
+
+Usa el `id` devuelto como `CLIENTE_ID` para solicitar una cotización:
+
+```json
+curl -X POST http://localhost:8080/api/cotizaciones \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"clienteId":"<CLIENTE_ID>","descripcionRiesgo":"Vehículo familiar","valorAsegurado":50000000,"puntajeRiesgo":20}'
+```
+
+Guarda el `id` de la cotización como `COTIZACION_ID`, evalúala y acéptala:
+
+```bash
+curl -X POST "http://localhost:8080/api/cotizaciones/$COTIZACION_ID/evaluacion" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"versionReglas":"2026.2","tasaBase":0.035,"umbralRevisionManual":70}'
+
+curl -X POST "http://localhost:8080/api/cotizaciones/$COTIZACION_ID/aceptacion" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### 3.3 Emitir la póliza
+
+Pólizas consulta la cotización aceptada por Eureka antes de emitir. Guarda el `id` devuelto
+como `POLIZA_ID`.
+
+```bash
+curl -X POST http://localhost:8080/api/polizas \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"cotizacionId":"<COTIZACION_ID>","fechaInicio":"2026-11-24","fechaFin":"2027-11-24"}'
+```
+
+### 3.4 Reportar un siniestro
+
+Siniestros obtiene de Pólizas el valor asegurado; el cliente ya no puede suministrar ese dato.
 
 ```bash
 curl -X POST http://localhost:8080/api/siniestros \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"polizaId":"33333333-3333-3333-3333-333333333333","descripcion":"Choque frontal","valorAseguradoPoliza":50000}'
+  -d '{"polizaId":"<POLIZA_ID>","descripcion":"Choque frontal"}'
 ```
 
-Respuesta `201 Created`:
+Guarda el `id` devuelto como `SINIESTRO_ID`. La cadena síncrona es
+`gateway → siniestros-service → polizas-service`; Siniestros publica el evento de reporte
+por RabbitMQ para que Auditoría lo persista.
 
-```json
-{
-  "id": "8f3c1d2e-...",
-  "polizaId": "33333333-3333-3333-3333-333333333333",
-  "descripcion": "Choque frontal",
-  "estado": "REPORTADO",
-  "valorAseguradoPoliza": 50000,
-  "montoAprobado": null
-}
-```
-
-**Cadena que se ejecuta:**
-
-```
-gateway (:8080)
-   └─▶ siniestros-service (:8084) ──▶ PostgreSQL siniestros_db
-              │
-              └── SiniestroReportado ──▶ RabbitMQ ──▶ auditoria-service ──▶ auditoria_db
-```
-
-Es decir: una petición síncrona del gateway al servicio de Siniestros, y **una propagación
-asíncrona** por RabbitMQ hacia la auditoría. Guardar el `id` devuelto como `SINIESTRO_ID`.
-
-### 3.3 Evaluar el siniestro
+### 3.5 Evaluar el siniestro
 
 ```bash
 curl -X POST http://localhost:8080/api/siniestros/$SINIESTRO_ID/evaluacion \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"estadoPoliza":"ACTIVA","esFraude":false,"montoPropuesto":10000}'
+  -d '{"esFraude":false,"montoPropuesto":10000}'
 ```
 
-Responde `200 OK` con `"estado": "APROBADO"` y `"montoAprobado": 10000.00`. Se publica
-`SiniestroResuelto` en RabbitMQ.
+Siniestros vuelve a consultar el estado real de la póliza antes de evaluar. Responde `200 OK`
+con `"estado": "APROBADO"` y `"montoAprobado": 10000.00`, y publica `SiniestroResuelto` en
+RabbitMQ.
 
-### 3.4 Verificar la auditoría (segundo servicio, vía asíncrona)
+### 3.6 Verificar la auditoría (vía asíncrona)
 
 ```bash
 curl http://localhost:8080/api/auditoria/siniestros/$SINIESTRO_ID \
@@ -195,7 +219,11 @@ Abrir la carpeta `bruno/` con [Bruno](https://www.usebruno.com/). Cada carpeta e
 → 8. **reintentar evaluación** (debe dar 400 y no duplicar eventos)
 
 Cada request trae sus propios `tests`, así que la colección se puede correr completa y falla
-si el contrato cambia.
+si el contrato cambia. Para `taller-03-ddd` y `taller-04-hexagonal`, configura el entorno
+`local` de `bruno/environments/local.bru` con un `token` válido y un `polizaId` vigente emitido
+por el flujo de §3. Para el rechazo por vencimiento de `taller-03-ddd`, configura además
+`polizaVencidaId` con una póliza vencida. `taller-06-mensajeria` conserva su propio entorno
+local.
 
 ---
 
@@ -210,8 +238,8 @@ cd siniestros-service && ./mvnw test
 
 | Servicio | Pruebas |
 |---|---:|
-| `digital-insurance-api` | 82 |
 | `cotizaciones-service` | 33 |
+| `polizas-service` | — |
 | `siniestros-service` | 30 |
 | `auth-service` | 1 |
 | `clientes-service` | 4 |
@@ -239,7 +267,7 @@ digital-insurance-project/
 ├── auth-service/             Identidad y JWT
 ├── clientes-service/         Clientes
 ├── cotizaciones-service/     Cotización y suscripción
-├── digital-insurance-api/    Pólizas (+ cliente y cotización heredados)
+├── polizas-service/          Pólizas (PostgreSQL; consulta Cotizaciones por Eureka)
 ├── siniestros-service/       Siniestros
 ├── auditoria-service/        Consumidor de hechos (auditoría)
 ├── bruno/                    Colecciones de requests
@@ -259,6 +287,8 @@ Cada servicio de dominio sigue **arquitectura hexagonal**:
 Las dependencias apuntan **hacia adentro**: el dominio no conoce Spring, ni JPA, ni RabbitMQ.
 
 Detalle completo, diagramas C4 y decisiones en [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md).
+`digital-insurance-api/` ya no forma parte del arranque ni del enrutamiento; tras verificar
+el flujo de esta guía, queda como código legado que puede retirarse.
 
 ---
 
@@ -283,7 +313,7 @@ Detalle completo, diagramas C4 y decisiones en [`docs/ARQUITECTURA.md`](docs/ARQ
 | Integrante | Subdominio | Carpeta |
 |---|---|---|
 | Laura Garzón | Cotización y suscripción | `cotizaciones-service/`, `clientes-service/`, `auth-service/`, `gateway/`, `discovery-server/` |
-| Diego Sierra | Pólizas | `digital-insurance-api/` (`poliza`) |
+| Diego Sierra | Pólizas | `polizas-service/` |
 | Nicolás Ruiz | Siniestros | `siniestros-service/`, `auditoria-service/` |
 
 ---
@@ -296,7 +326,7 @@ Detalle completo, diagramas C4 y decisiones en [`docs/ARQUITECTURA.md`](docs/ARQ
 | Los servicios no se ven en Eureka | Arrancarlos en el orden de §2.3 y esperar 30 s |
 | `Connection refused` a `localhost:8761` | `discovery-server` no está arriba: arrancarlo primero |
 | `404` en `/api/auditoria/...` | El consumidor aún no procesó el evento: esperar y repetir |
-| Gateway y monolito chocan en el puerto | Ya resuelto: el monolito usa 8090 desde §2.3 |
+| Gateway da 503 en `/api/polizas` | Verificar que `polizas-service` aparezca en Eureka y que escuche en 8086 |
 | `403` en cualquier endpoint | Falta el header `Authorization: Bearer <token>` |
 | `Conflict. The container name "/rabbitmq" is already in use` | Hay otro RabbitMQ de un proyecto anterior. Este compose usa `insurance-rabbitmq` para no chocar; si aun así aparece, `docker rm <nombre>` |
 | RabbitMQ arranca pero el consumidor no recibe nada | Verificar que la cola `auditoria.siniestros.queue` exista en <http://localhost:15672> → Queues |

@@ -1,6 +1,6 @@
 # P-01. Siniestros consulta la póliza en lugar de confiar en el cliente
 
-Estado: **Propuesta** — no implementado en el código
+Estado: **Aceptado — implementado**
 
 ## Contexto
 
@@ -11,9 +11,9 @@ public void evaluar(Siniestro siniestro, EstadoPolizaReferencia estadoPoliza,
                     boolean esFraude, BigDecimal montoPropuesto)
 ```
 
-El estado de la póliza **entra como parámetro**. Es decir: el sistema toma como verdad el
-`estadoPoliza` que declara el cliente al reportar el siniestro. Si un cliente envía
-`VIGENTE` sobre una póliza cancelada, la evaluación lo acepta.
+Antes de implementar este ADR, el estado de la póliza entraba como parámetro y el sistema
+tomaba como verdad el `estadoPoliza` declarado por el cliente. Eso permitía aceptar
+`VIGENTE` sobre una póliza cancelada.
 
 En una aseguradora esto no es un detalle técnico: permite aprobar un reclamo sobre un
 contrato que no está en vigor. El contexto de Pólizas ya expone `GET /api/polizas/{id}`
@@ -22,15 +22,19 @@ viable hoy.
 
 ## Decisión
 
-**Propuesta:** introducir un puerto `ConsultaPolizaPort` en el dominio de Siniestros, con
-un adaptador en infraestructura que consulte el contrato REST de Pólizas. La evaluación
-deja de recibir `estadoPoliza` como entrada y lo obtiene del puerto.
+Introducir el puerto `ConsultaPolizaPort` en el dominio de Siniestros, con un adaptador
+REST en infraestructura que consulta `polizas-service` por Eureka. Al reportar, Siniestros
+obtiene de Pólizas el valor asegurado; al evaluar, obtiene el estado vigente. El contrato
+HTTP ya no acepta el valor asegurado ni el estado de póliza como datos de autoridad del
+cliente. El JWT de la petición se propaga en la llamada entre servicios.
 
-Con timeout acotado y Circuit Breaker, y una decisión explícita para el caso en que
-Pólizas no responda: **rechazar la evaluación y dejarla pendiente**, nunca asumir vigencia.
+Si Pólizas no encuentra la póliza, la operación responde `404`. Las llamadas entre
+Cotizaciones/Pólizas/Siniestros tienen connect timeout de 2 s y read timeout de 3 s. Si el
+servicio no está disponible, el error se propaga; nunca se asume que la póliza está vigente.
+Circuit Breaker queda como mejora futura si las métricas de disponibilidad lo justifican.
 
-El patrón ya existe en el repositorio: `ConsultaCotizacionPort` y
-`ConsultaCotizacionAdapter` hacen exactamente esto entre Pólizas y Cotización.
+La emisión de Pólizas aplica el mismo límite: consulta `cotizaciones-service` por Eureka y
+solo permite emitir cuando la cotización existe y está aceptada.
 
 ## Alternativas descartadas
 
@@ -51,8 +55,8 @@ decidir. Se pospone hasta que el flujo sea asíncrono por otra razón.
 (+) **Control real sobre el reclamo.** La decisión se basa en la póliza de registro, no en
 lo que el reclamante afirma.
 
-(+) **Trazabilidad.** Cada evaluación queda vinculada a una consulta concreta a Pólizas,
-lo que sirve para auditoría.
+(+) **Trazabilidad.** Cada siniestro conserva el valor obtenido de la póliza y cada
+evaluación vuelve a consultar su estado actual.
 
 (+) **La regla de dominio se vuelve testeable sin ambigüedad**: el test usa un doble del
 puerto con estados conocidos.
@@ -60,8 +64,8 @@ puerto con estados conocidos.
 (−) **Una llamada de red en el camino crítico.** Hoy la evaluación es local y rápida; con
 el puerto depende de otro contexto.
 
-(−) **Un modo de fallo nuevo.** Si Pólizas está caído, la evaluación no puede completarse.
-Hay que definir la experiencia: dejar el siniestro pendiente y comunicarlo.
+(−) **Un modo de fallo nuevo.** Si Pólizas está caído, reportar o evaluar no puede
+completarse; el error se comunica sin producir un resultado de éxito falso.
 
 (−) **Latencia añadida** al flujo de evaluación, que hay que medir contra el objetivo de
 respuesta.

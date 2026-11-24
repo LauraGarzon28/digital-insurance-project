@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.digital_insurance_company.siniestros.dominio.SiniestroNoEncontradoException;
+import com.digital_insurance_company.siniestros.dominio.PolizaNoEncontradaException;
 
 @RestControllerAdvice
 public class SiniestroControllerAdvice {
@@ -15,6 +16,13 @@ public class SiniestroControllerAdvice {
     @ExceptionHandler(SiniestroNoEncontradoException.class)
     public ResponseEntity<Map<String, String>> manejarNoEncontrado(
             SiniestroNoEncontradoException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("mensaje", exception.getMessage()));
+    }
+
+    @ExceptionHandler(PolizaNoEncontradaException.class)
+    public ResponseEntity<Map<String, String>> manejarPolizaNoEncontrada(
+            PolizaNoEncontradaException exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("mensaje", exception.getMessage()));
     }

@@ -1,0 +1,2 @@
+ALTER TABLE polizas
+    ADD COLUMN en_cancelacion BOOLEAN NOT NULL DEFAULT FALSE;
