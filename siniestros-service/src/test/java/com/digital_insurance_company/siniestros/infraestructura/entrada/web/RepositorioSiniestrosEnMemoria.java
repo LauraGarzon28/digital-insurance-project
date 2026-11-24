@@ -2,6 +2,8 @@ package com.digital_insurance_company.siniestros.infraestructura.entrada.web;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,5 +27,10 @@ class RepositorioSiniestrosEnMemoria implements RepositorioSiniestros {
     @Override
     public Optional<Siniestro> buscarPorId(UUID id) {
         return Optional.ofNullable(almacen.get(id));
+    }
+
+    @Override
+    public List<Siniestro> listarTodos() {
+        return new ArrayList<>(almacen.values());
     }
 }

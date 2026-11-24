@@ -2,6 +2,7 @@ package com.digital_insurance_company.siniestros.infraestructura.salida.persiste
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
@@ -32,6 +33,11 @@ public class SiniestroRepositoryAdapter implements RepositorioSiniestros {
         return repositorioJpa.findById(id).map(this::aDominio);
     }
 
+    @Override
+    public List<Siniestro> listarTodos() {
+        return repositorioJpa.findAll().stream().map(this::aDominio).toList();
+    }
+
     private Siniestro aDominio(SiniestroJpaEntity entidad) {
         return siniestroFactory.reconstituir(
                 entidad.getId(),
@@ -39,6 +45,7 @@ public class SiniestroRepositoryAdapter implements RepositorioSiniestros {
                 entidad.getDescripcion(),
                 entidad.getEstado(),
                 entidad.getValorAseguradoPoliza(),
+                entidad.getAjustadorId(),
                 entidad.getMontoAprobado());
     }
 }

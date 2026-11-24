@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import com.digital_insurance_company.siniestros.aplicacion.SiniestroApplicationService;
 import com.digital_insurance_company.siniestros.dominio.EvaluacionSiniestroService;
 import com.digital_insurance_company.siniestros.dominio.SiniestroFactory;
+import com.digital_insurance_company.siniestros.dominio.puertos.ConsultaPolizaPort;
 import com.digital_insurance_company.siniestros.dominio.puertos.PublicadorEventosSiniestro;
 import com.digital_insurance_company.siniestros.dominio.puertos.RepositorioSiniestros;
 import com.digital_insurance_company.siniestros.dominio.puertos.SiniestroUseCase;
@@ -28,11 +29,13 @@ public class SiniestroConfiguration {
             SiniestroFactory siniestroFactory,
             EvaluacionSiniestroService evaluacionSiniestroService,
             RepositorioSiniestros repositorioSiniestros,
-            PublicadorEventosSiniestro publicadorEventos) {
+            PublicadorEventosSiniestro publicadorEventos,
+            ConsultaPolizaPort consultaPoliza) {
         return new SiniestroApplicationService(
                 siniestroFactory,
                 evaluacionSiniestroService,
                 repositorioSiniestros,
-                publicadorEventos);
+                publicadorEventos,
+                consultaPoliza);
     }
 }

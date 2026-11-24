@@ -12,19 +12,19 @@ post {
 
 headers {
   Content-Type: application/json
+  Authorization: Bearer {{token}}
 }
 
 body:json {
   {
-    "polizaId": "33333333-3333-3333-3333-333333333333",
-    "descripcion": "Choque frontal",
-    "valorAseguradoPoliza": 0
+    "polizaId": "{{polizaId}}",
+    "descripcion": ""
   }
 }
 
 assert {
   res.status: eq 400
-  res.body.mensaje: eq El valor asegurado de la póliza debe ser mayor a cero
+  res.body.mensaje: eq La descripción del siniestro no puede estar vacía
 }
 
 docs {

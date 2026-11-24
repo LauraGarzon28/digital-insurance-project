@@ -17,9 +17,12 @@ import org.junit.jupiter.api.Test;
 import com.digital_insurance_company.siniestros.dominio.EstadoPolizaReferencia;
 import com.digital_insurance_company.siniestros.dominio.EstadoSiniestro;
 import com.digital_insurance_company.siniestros.dominio.EvaluacionSiniestroService;
+import com.digital_insurance_company.siniestros.dominio.DatosPolizaParaSiniestro;
+import com.digital_insurance_company.siniestros.dominio.PolizaNoEncontradaException;
 import com.digital_insurance_company.siniestros.dominio.Siniestro;
 import com.digital_insurance_company.siniestros.dominio.SiniestroFactory;
 import com.digital_insurance_company.siniestros.dominio.SiniestroNoEncontradoException;
+import com.digital_insurance_company.siniestros.dominio.puertos.ConsultaPolizaPort;
 import com.digital_insurance_company.siniestros.dominio.puertos.PublicadorEventosSiniestro;
 import com.digital_insurance_company.siniestros.dominio.puertos.RepositorioSiniestros;
 import com.digital_insurance_company.siniestros.dominio.puertos.SiniestroUseCase;
@@ -46,6 +49,11 @@ class SiniestroApplicationServiceTest {
         public Optional<Siniestro> buscarPorId(UUID id) {
             return Optional.ofNullable(almacen.get(id));
         }
+
+        @Override
+        public java.util.List<Siniestro> listarTodos() {
+            return new java.util.ArrayList<>(almacen.values());
+        }
     }
 
     /**
@@ -55,6 +63,7 @@ class SiniestroApplicationServiceTest {
     private static class PublicadorEventosFake implements PublicadorEventosSiniestro {
 
         final List<EstadoSiniestro> reportados = new ArrayList<>();
+        final List<UUID> asignados = new ArrayList<>();
         final List<EstadoSiniestro> resueltos = new ArrayList<>();
 
         @Override
@@ -63,48 +72,84 @@ class SiniestroApplicationServiceTest {
         }
 
         @Override
+        public void siniestroAsignado(Siniestro siniestro) {
+            asignados.add(siniestro.getAjustadorId());
+        }
+
+        @Override
         public void siniestroResuelto(Siniestro siniestro) {
             resueltos.add(siniestro.getEstado());
         }
     }
 
+    private static class ConsultaPolizaFake implements ConsultaPolizaPort {
+        final Map<UUID, DatosPolizaParaSiniestro> polizas = new HashMap<>();
+
+        @Override
+        public Optional<DatosPolizaParaSiniestro> buscarPorId(UUID polizaId) {
+            return Optional.ofNullable(polizas.get(polizaId));
+        }
+    }
+
     private final RepositorioSiniestrosFake repositorio = new RepositorioSiniestrosFake();
     private final PublicadorEventosFake publicador = new PublicadorEventosFake();
+    private final ConsultaPolizaFake consultaPoliza = new ConsultaPolizaFake();
     private final SiniestroUseCase casosDeUso = new SiniestroApplicationService(
-            new SiniestroFactory(), new EvaluacionSiniestroService(), repositorio, publicador);
+            new SiniestroFactory(), new EvaluacionSiniestroService(), repositorio, publicador, consultaPoliza);
+
+    private Siniestro reportar(String descripcion, BigDecimal valorAsegurado) {
+        consultaPoliza.polizas.put(POLIZA_ID, new DatosPolizaParaSiniestro(
+                valorAsegurado, EstadoPolizaReferencia.ACTIVA));
+        return casosDeUso.reportarSiniestro(POLIZA_ID, descripcion);
+    }
 
     @Test
-    void reportarGuardaElSiniestroEnEstadoReportado() {
-        Siniestro siniestro = casosDeUso.reportarSiniestro(POLIZA_ID, "Choque frontal", new BigDecimal("50000"));
+    void reportarGuardaElSiniestroConElValorAseguradoConsultado() {
+        Siniestro siniestro = reportar("Choque frontal", new BigDecimal("50000"));
 
         assertEquals(EstadoSiniestro.REPORTADO, siniestro.getEstado());
+        assertEquals(new BigDecimal("50000"), siniestro.getValorAseguradoPoliza());
         assertTrue(repositorio.buscarPorId(siniestro.getId()).isPresent());
     }
 
     @Test
     void reportarPublicaElEventoSiniestroReportado() {
-        casosDeUso.reportarSiniestro(POLIZA_ID, "Choque frontal", new BigDecimal("50000"));
+        reportar("Choque frontal", new BigDecimal("50000"));
 
         assertEquals(List.of(EstadoSiniestro.REPORTADO), publicador.reportados);
         assertTrue(publicador.resueltos.isEmpty());
     }
 
     @Test
+    void asignarAjustadorGuardaLaAsignacionYPasaAEnEvaluacion() {
+        Siniestro siniestro = reportar("Choque frontal", new BigDecimal("50000"));
+        UUID ajustadorId = UUID.randomUUID();
+
+        Siniestro asignado = casosDeUso.asignarAjustador(siniestro.getId(), ajustadorId);
+
+        assertEquals(ajustadorId, asignado.getAjustadorId());
+        assertEquals(EstadoSiniestro.EN_EVALUACION, asignado.getEstado());
+        assertEquals(List.of(ajustadorId), publicador.asignados);
+    }
+
+    @Test
     void evaluarConPolizaVencidaRechazaElSiniestro() {
-        Siniestro siniestro = casosDeUso.reportarSiniestro(POLIZA_ID, "Daños por agua", new BigDecimal("20000"));
+        Siniestro siniestro = reportar("Daños por agua", new BigDecimal("20000"));
+        consultaPoliza.polizas.put(POLIZA_ID, new DatosPolizaParaSiniestro(
+                new BigDecimal("20000"), EstadoPolizaReferencia.VENCIDA));
 
         Siniestro evaluado = casosDeUso.evaluarSiniestro(
-                siniestro.getId(), EstadoPolizaReferencia.VENCIDA, false, new BigDecimal("5000"));
+                siniestro.getId(), false, new BigDecimal("5000"));
 
         assertEquals(EstadoSiniestro.RECHAZADO, evaluado.getEstado());
     }
 
     @Test
     void evaluarSinFraudeConPolizaActivaApruebaElSiniestro() {
-        Siniestro siniestro = casosDeUso.reportarSiniestro(POLIZA_ID, "Robo de equipo", new BigDecimal("15000"));
+        Siniestro siniestro = reportar("Robo de equipo", new BigDecimal("15000"));
 
         Siniestro evaluado = casosDeUso.evaluarSiniestro(
-                siniestro.getId(), EstadoPolizaReferencia.ACTIVA, false, new BigDecimal("10000"));
+                siniestro.getId(), false, new BigDecimal("10000"));
 
         assertEquals(EstadoSiniestro.APROBADO, evaluado.getEstado());
         assertNotNull(evaluado.getMontoAprobado());
@@ -112,30 +157,30 @@ class SiniestroApplicationServiceTest {
 
     @Test
     void evaluarPublicaElEventoSiniestroResueltoConElEstadoFinal() {
-        Siniestro siniestro = casosDeUso.reportarSiniestro(POLIZA_ID, "Robo de equipo", new BigDecimal("15000"));
+        Siniestro siniestro = reportar("Robo de equipo", new BigDecimal("15000"));
 
         casosDeUso.evaluarSiniestro(
-                siniestro.getId(), EstadoPolizaReferencia.ACTIVA, false, new BigDecimal("10000"));
+                siniestro.getId(), false, new BigDecimal("10000"));
 
         assertEquals(List.of(EstadoSiniestro.APROBADO), publicador.resueltos);
     }
 
     @Test
     void unRechazoTambienPublicaElEventoSiniestroResuelto() {
-        Siniestro siniestro = casosDeUso.reportarSiniestro(POLIZA_ID, "Daños por agua", new BigDecimal("20000"));
+        Siniestro siniestro = reportar("Daños por agua", new BigDecimal("20000"));
 
         casosDeUso.evaluarSiniestro(
-                siniestro.getId(), EstadoPolizaReferencia.ACTIVA, true, new BigDecimal("5000"));
+                siniestro.getId(), true, new BigDecimal("5000"));
 
         assertEquals(List.of(EstadoSiniestro.RECHAZADO), publicador.resueltos);
     }
 
     @Test
     void unaEvaluacionFallidaNoPublicaEventos() {
-        Siniestro siniestro = casosDeUso.reportarSiniestro(POLIZA_ID, "Daños por agua", new BigDecimal("20000"));
+        Siniestro siniestro = reportar("Daños por agua", new BigDecimal("20000"));
 
         assertThrows(IllegalArgumentException.class, () -> casosDeUso.evaluarSiniestro(
-                siniestro.getId(), EstadoPolizaReferencia.ACTIVA, false, new BigDecimal("999999")));
+                siniestro.getId(), false, new BigDecimal("999999")));
 
         assertTrue(publicador.resueltos.isEmpty());
     }
@@ -143,9 +188,14 @@ class SiniestroApplicationServiceTest {
     @Test
     void evaluarUnSiniestroInexistenteLanzaExcepcionDeDominio() {
         SiniestroNoEncontradoException excepcion = assertThrows(SiniestroNoEncontradoException.class,
-                () -> casosDeUso.evaluarSiniestro(UUID.randomUUID(),
-                        EstadoPolizaReferencia.ACTIVA, false, new BigDecimal("1000")));
+                () -> casosDeUso.evaluarSiniestro(UUID.randomUUID(), false, new BigDecimal("1000")));
         assertNotNull(excepcion);
+    }
+
+    @Test
+    void reportarConPolizaInexistenteLanzaExcepcionDeDominio() {
+        assertThrows(PolizaNoEncontradaException.class,
+                () -> casosDeUso.reportarSiniestro(POLIZA_ID, "Choque frontal"));
     }
 
     @Test

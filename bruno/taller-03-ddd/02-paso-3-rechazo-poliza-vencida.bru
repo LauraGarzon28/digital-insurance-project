@@ -12,11 +12,11 @@ post {
 
 headers {
   Content-Type: application/json
+  Authorization: Bearer {{token}}
 }
 
 body:json {
   {
-    "estadoPoliza": "VENCIDA",
     "esFraude": false,
     "montoPropuesto": 5000
   }

@@ -76,6 +76,10 @@ resuelve, lo hace más evidente.
 que cualquier flujo que toque ambos necesitará saga o compensación. Hoy no existe tal flujo, y
 conviene que siga así hasta que haya una razón de negocio.
 
-(−) **Duplicación temporal de código.** `digital-insurance-api` conserva sus propios paquetes
-`cliente` y `cotizacion` heredados, que conviven con los servicios extraídos hasta que se
-retiren. Es deuda registrada, no un olvido.
+(−) **Duplicación temporal de código.** `digital-insurance-api` conservaba inicialmente paquetes
+heredados hasta completar la migración de todos los contextos.
+
+> **Actualización posterior:** tras esta fase 1, el equipo implementó también el ADR P-01
+> (Siniestros consulta a `polizas-service` vía Eureka), extrajo los demás contextos a servicios
+> propios (8 servicios y 6 bases PostgreSQL en total) y retiró `digital-insurance-api/` del
+> repositorio.

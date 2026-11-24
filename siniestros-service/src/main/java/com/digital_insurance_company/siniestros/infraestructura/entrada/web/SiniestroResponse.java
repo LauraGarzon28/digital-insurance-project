@@ -11,7 +11,8 @@ public record SiniestroResponse(UUID id,
         String descripcion,
         EstadoSiniestro estado,
         BigDecimal valorAseguradoPoliza,
-        BigDecimal montoAprobado) {
+        BigDecimal montoAprobado,
+        UUID ajustadorId) {
 
     public static SiniestroResponse desde(Siniestro siniestro) {
         return new SiniestroResponse(
@@ -20,6 +21,7 @@ public record SiniestroResponse(UUID id,
                 siniestro.getDescripcion(),
                 siniestro.getEstado(),
                 siniestro.getValorAseguradoPoliza(),
-                siniestro.getMontoAprobado() == null ? null : siniestro.getMontoAprobado().valor());
+                siniestro.getMontoAprobado() == null ? null : siniestro.getMontoAprobado().valor(),
+                siniestro.getAjustadorId());
     }
 }

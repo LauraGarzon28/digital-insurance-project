@@ -2,6 +2,7 @@ package com.cotizaciones_service.cotizacion.infraestructura.entrada.web;
 
 import java.net.URI;
 import java.util.UUID;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.validation.Valid;
 
@@ -76,5 +78,14 @@ public class CotizacionController {
     @PostMapping("/{id}/aceptacion")
     public CotizacionResponse aceptar(@PathVariable UUID id) {
         return CotizacionResponse.desde(cotizacionUseCase.aceptar(id));
+    }
+
+    @GetMapping
+    public List<CotizacionResponse> listar(
+            @RequestParam(required = false) UUID clienteId,
+            @RequestParam(required = false) String estado) {
+        return cotizacionUseCase.listar(clienteId, estado).stream()
+                .map(CotizacionResponse::desde)
+                .toList();
     }
 }

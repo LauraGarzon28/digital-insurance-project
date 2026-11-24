@@ -12,13 +12,13 @@ post {
 
 headers {
   Content-Type: application/json
+  Authorization: Bearer {{token}}
 }
 
 body:json {
   {
-    "polizaId": "33333333-3333-3333-3333-333333333333",
-    "descripcion": "Daños por agua",
-    "valorAseguradoPoliza": 1000000
+    "polizaId": "{{polizaId}}",
+    "descripcion": "Daños por agua"
   }
 }
 
@@ -32,6 +32,6 @@ script:post-response {
 }
 
 docs {
-  Crea un tercer siniestro con valor asegurado de 1.000.000 (guardado en siniestroC)
+  Crea un tercer siniestro sobre la póliza configurada (guardado en siniestroC)
   para probar el value object MontoAprobado en el siguiente request.
 }

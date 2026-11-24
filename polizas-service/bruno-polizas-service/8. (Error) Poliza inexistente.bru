@@ -1,0 +1,15 @@
+meta {
+  name: 8. (Error) Poliza inexistente
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/polizas/00000000-0000-0000-0000-000000000000
+}
+
+tests {
+  test("status 404 Not Found", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+}

@@ -48,7 +48,7 @@ spring:
                 - RewritePath=/api/(?<segment>.*), /$\{segment}
 
             - id: polizas
-              uri: ${MONOLITO_URL:http://localhost:8090}
+              uri: lb://polizas-service
               predicates:
                 - Path=/api/polizas/**
 

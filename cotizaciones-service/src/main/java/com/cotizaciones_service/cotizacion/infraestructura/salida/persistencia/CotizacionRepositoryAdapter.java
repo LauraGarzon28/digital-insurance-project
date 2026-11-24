@@ -2,6 +2,7 @@ package com.cotizaciones_service.cotizacion.infraestructura.salida.persistencia;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
@@ -29,6 +30,22 @@ public class CotizacionRepositoryAdapter implements RepositorioCotizaciones {
     @Override
     public Optional<Cotizacion> buscarPorId(UUID id) {
         return jpa.findById(id).map(this::aDominio);
+    }
+
+    @Override
+    public List<Cotizacion> listar(UUID clienteId, String estado) {
+        List<CotizacionJpaEntity> entidades;
+        if (clienteId != null) {
+            entidades = jpa.findByClienteId(clienteId);
+        } else if (estado != null && !estado.isBlank()) {
+            entidades = jpa.findByEstado(estado);
+        } else {
+            entidades = jpa.findAll();
+        }
+        if (clienteId != null && estado != null && !estado.isBlank()) {
+            entidades = entidades.stream().filter(e -> estado.equals(e.getEstado())).toList();
+        }
+        return entidades.stream().map(this::aDominio).toList();
     }
 
     private CotizacionJpaEntity aEntidad(Cotizacion c) {

@@ -1,0 +1,18 @@
+meta {
+  name: 4. Renovar poliza
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/polizas/{{polizaId}}/renovaciones
+}
+
+tests {
+  test("status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  test("fechaInicio avanzo", function() {
+    expect(res.body.fechaInicio).to.equal("2027-01-01");
+  });
+}

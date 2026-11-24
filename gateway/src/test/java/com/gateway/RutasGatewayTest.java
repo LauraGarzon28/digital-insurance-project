@@ -35,7 +35,6 @@ class RutasGatewayTest {
     @Test
     void lasRutasDeServiciosUsanBalanceoPorEureka() {
         List<String> uris = routeLocator.getRoutes()
-                .filter(route -> !"polizas".equals(route.getId()))
                 .map(route -> route.getUri().toString())
                 .collectList()
                 .block();
@@ -43,6 +42,16 @@ class RutasGatewayTest {
         assertNotNull(uris);
         assertTrue(uris.stream().allMatch(uri -> uri.startsWith("lb://")),
                 "Las rutas deben resolverse por Eureka, pero fueron " + uris);
+    }
+
+    @Test
+    void polizasSeEnrutaAlServicioDescubiertoPorEureka() {
+        String uriPolizas = routeLocator.getRoutes()
+                .filter(route -> "polizas".equals(route.getId()))
+                .map(route -> route.getUri().toString())
+                .blockFirst();
+
+        assertEquals("lb://polizas-service", uriPolizas);
     }
 
     @Test

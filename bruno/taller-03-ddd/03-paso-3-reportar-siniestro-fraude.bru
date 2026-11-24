@@ -12,13 +12,13 @@ post {
 
 headers {
   Content-Type: application/json
+  Authorization: Bearer {{token}}
 }
 
 body:json {
   {
-    "polizaId": "33333333-3333-3333-3333-333333333333",
-    "descripcion": "Robo de equipo",
-    "valorAseguradoPoliza": 15000
+    "polizaId": "{{polizaId}}",
+    "descripcion": "Robo de equipo"
   }
 }
 

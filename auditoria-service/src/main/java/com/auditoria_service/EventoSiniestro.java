@@ -15,5 +15,6 @@ public record EventoSiniestro(
         UUID polizaId,
         String estado,
         BigDecimal montoAprobado,
+        UUID ajustadorId,
         Instant ocurridoEn) {
 }

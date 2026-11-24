@@ -34,6 +34,20 @@ public class RabbitSiniestroEventPublisher implements PublicadorEventosSiniestro
                 siniestro.getPolizaId(),
                 siniestro.getEstado().name(),
                 null,
+                null,
+                Instant.now()));
+    }
+
+    @Override
+    public void siniestroAsignado(Siniestro siniestro) {
+        publicar(new EventoSiniestro(
+                UUID.randomUUID(),
+                "SiniestroAsignadoAjustador",
+                siniestro.getId(),
+                siniestro.getPolizaId(),
+                siniestro.getEstado().name(),
+                null,
+                siniestro.getAjustadorId(),
                 Instant.now()));
     }
 
@@ -46,6 +60,7 @@ public class RabbitSiniestroEventPublisher implements PublicadorEventosSiniestro
                 siniestro.getPolizaId(),
                 siniestro.getEstado().name(),
                 siniestro.getMontoAprobado() == null ? null : siniestro.getMontoAprobado().valor(),
+                siniestro.getAjustadorId(),
                 Instant.now()));
     }
 
@@ -60,6 +75,7 @@ public class RabbitSiniestroEventPublisher implements PublicadorEventosSiniestro
             UUID polizaId,
             String estado,
             java.math.BigDecimal montoAprobado,
+            UUID ajustadorId,
             Instant ocurridoEn) {
     }
 }

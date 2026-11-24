@@ -19,7 +19,7 @@ class SiniestroReconstitucionTest {
     void reconstituyeUnSiniestroReportadoSinMonto() {
         Siniestro siniestro = factory.reconstituir(
                 SINIESTRO_ID, POLIZA_ID, "Choque frontal",
-                EstadoSiniestro.REPORTADO, new BigDecimal("50000"), null);
+                EstadoSiniestro.REPORTADO, new BigDecimal("50000"), null, null);
 
         assertEquals(SINIESTRO_ID, siniestro.getId());
         assertEquals(POLIZA_ID, siniestro.getPolizaId());
@@ -31,7 +31,7 @@ class SiniestroReconstitucionTest {
     void reconstituyeUnSiniestroAprobadoConservandoSuMonto() {
         Siniestro siniestro = factory.reconstituir(
                 SINIESTRO_ID, POLIZA_ID, "Robo de equipo",
-                EstadoSiniestro.APROBADO, new BigDecimal("15000"), new BigDecimal("10000"));
+                EstadoSiniestro.APROBADO, new BigDecimal("15000"), null, new BigDecimal("10000"));
 
         assertEquals(EstadoSiniestro.APROBADO, siniestro.getEstado());
         assertEquals(new BigDecimal("10000.00"), siniestro.getMontoAprobado().valor());
@@ -41,7 +41,7 @@ class SiniestroReconstitucionTest {
     void unSiniestroReconstituidoAprobadoNoPuedeVolverAEvaluarse() {
         Siniestro siniestro = factory.reconstituir(
                 SINIESTRO_ID, POLIZA_ID, "Robo de equipo",
-                EstadoSiniestro.APROBADO, new BigDecimal("15000"), new BigDecimal("10000"));
+                EstadoSiniestro.APROBADO, new BigDecimal("15000"), null, new BigDecimal("10000"));
 
         assertThrows(IllegalStateException.class, siniestro::marcarEnEvaluacion);
     }
@@ -50,7 +50,7 @@ class SiniestroReconstitucionTest {
     void unSiniestroReconstituidoRechazadoConservaSuEstado() {
         Siniestro siniestro = factory.reconstituir(
                 SINIESTRO_ID, POLIZA_ID, "Fraude",
-                EstadoSiniestro.RECHAZADO, new BigDecimal("15000"), null);
+                EstadoSiniestro.RECHAZADO, new BigDecimal("15000"), null, null);
 
         assertEquals(EstadoSiniestro.RECHAZADO, siniestro.getEstado());
     }

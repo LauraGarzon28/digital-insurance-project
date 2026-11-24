@@ -70,12 +70,11 @@ aislamiento y la escala. Se pueden hacer por separado, y por eso la fase 1 es so
 
 ---
 
-## Decisión
+## Decisión (contexto histórico y evolución real)
 
-> **Elegimos C (extraer solo Siniestros) porque concentra el riesgo de control del dato y la
-> asimetría de carga, sin pagar el costo de distribuir Cotización y Pólizas, aceptando el
-> costo de una base más que operar, consistencia eventual en los flujos que crucen contextos
-> y la necesidad de una Saga donde hoy hay una transacción local.**
+> **La matriz eligió inicialmente C (extraer solo Siniestros) frente a quedarse en el monolito (A) o distribuir los tres a la vez (B) desde el día uno.**
 
-El ganador coincide con el ADR P-02. Lo que **no** está implementado se declara como
-propuesta, no como hecho: hoy el proyecto está en la opción **A** del código.
+Con el avance del proyecto hasta el corte actual:
+1. Se implementó **P-01** (Siniestros consulta a Pólizas vía puerto REST en vez de confiar en el cliente).
+2. Se implementó **P-06** (`auditoria-service` con RabbitMQ y consumo idempotente).
+3. Tras validar la fase 1 (`P-07`), el equipo completó también la separación de `clientes-service`, `cotizaciones-service`, `polizas-service`, `auth-service`, `gateway` y `discovery-server`, con persistencia PostgreSQL independiente por servicio, retirando el monolito legado.
